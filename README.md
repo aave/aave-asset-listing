@@ -10,11 +10,6 @@ You must have followed all the previous step from the [guide](https://docs.aave.
 - You must have created the associated AIP, uploaded it to IPFS.
 - You must have enough Proposition Power.
 
-
-## Install: 
-
-`$ npm i`
-
 ## Set the environment variables.
 
 Copy the `.env.example` file, rename it to `.env` and update it to match with your tokens addresses and your risk parameters.
@@ -41,5 +36,23 @@ IPFS_HASH=QmNfU4FMdQriJVQeqQTNxgY63iSJVh8yCJf8aFDkQDjaLQ
 
 ## Run the deployment script
 
-`$ npx hardhat create:proposal-new-asset --network main`
+### node: 
+
+`$ npm i`
+
+`$ npm run propose-new-asset:kovan` for kovan
+
+`$ npm run propose-new-asset:main` for mainnet
+
+### docker-compose
+
+In one terminal tab: `docker-compose up`
+
+Enter the container in new tab: `docker-compose exec contracts-env bash`
+
+In the container run: 
+
+`$ npm run propose-new-asset:kovan` for kovan
+
+`$ npm run propose-new-asset:main` for mainnet
 

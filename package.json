@@ -1,13 +1,16 @@
 {
-  "name": "hhboiler",
+  "name": "aave-proposal-deployer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run-env": "npm i && tail -f /dev/null",
+    "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
+    "propose-new-asset:main": "hardhat create:proposal-new-asset --network main"
   },
   "keywords": [],
-  "author": "",
+  "author": "dhadrien",
   "license": "ISC",
   "dependencies": {
     "hardhat": "^2.0.7"

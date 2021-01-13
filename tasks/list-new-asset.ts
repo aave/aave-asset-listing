@@ -26,7 +26,7 @@ if (!TOKEN || !ATOKEN || !STABLE_DEBT_TOKEN || !VARIABLE_DEBT_TOKEN
   || !INTEREST_STRATEGY || !LTV || !LIQUIDATION_BONUS || !LIQUIDATION_THRESHOLD || !DECIMALS
   || (ENABLE_BORROW !== 'true' && ENABLE_BORROW !== 'false')
   || (ENABLE_AS_COLLATERAL !== 'true' && ENABLE_AS_COLLATERAL !== 'false')
-  || !IPFS_HASH || !AAVE_GOVERNANCE_V2 || !AAVE_SHORT_EXECUTOR
+  || !IPFS_HASH || !AAVE_GOVERNANCE_V2 || !AAVE_SHORT_EXECUTOR || !RESERVE_FACTOR
 ) {
   throw new Error('You have not set correctly the .env file, make sure to read the README.md');
 }
@@ -36,7 +36,7 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
   .setAction(async ({ }, _DRE) => {
     const proposer = (await _DRE.ethers.getSigners())[0];
     const genericPayloadAddress = (await _DRE.deployments.get('AssetListingProposalGenericExecutor')).address;
-    const executeSignature = 'execute(address,address,address,address,address,uint256,uint256,uint256,uint8,bool,bool';
+    const executeSignature = 'execute(address,address,address,address,address,uint256,uint256,uint256,uint256,uint8,bool,bool)';
     const callData = _DRE.ethers.utils.defaultAbiCoder.encode([
       'address',
       'address',

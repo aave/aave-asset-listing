@@ -8,6 +8,7 @@ You must have followed all the previous step from the [guide](https://docs.aave.
 - You must have agreed with the Aave Genesis team on risk parameters for your token during an ARC.
 - You must have deployed the AToken, VariableDebtToken, StableDebtToken, InterestStrategy overlying contracts for your token.
 - You must have created the associated AIP, uploaded it to IPFS.
+- You must have enough Proposition Power.
 
 
 ## Install: 

@@ -1,0 +1,129 @@
+{
+  "address": "0x62121B60a826b496f05bdD45dFe40C51fb549D97",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "ProposalExecuted",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "LENDING_POOL_CONFIGURATOR_V2",
+      "outputs": [
+        {
+          "internalType": "contract ILendingPoolConfiguratorV2",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "aToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "stableDebtToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "variablDebtToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "interestStrategy",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "ltv",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "liquidationThreshold",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "liquidationBonus",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "enableBorrowOnReserve",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "enableAsCollateral",
+          "type": "bool"
+        }
+      ],
+      "name": "execute",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xed914e28609cb69821933edcb5686c97b4b00b903d4d50d00b9d20c3e29ac503",
+  "receipt": {
+    "to": null,
+    "from": "0x4C1e2f7eCA15c682C0da73f73C8DF40623984B57",
+    "contractAddress": "0x62121B60a826b496f05bdD45dFe40C51fb549D97",
+    "transactionIndex": 76,
+    "gasUsed": "350452",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xd1c773db9c53ff06afbb287c0d98dd88cd9ee378018215aefb0f68f2b4c9f233",
+    "transactionHash": "0xed914e28609cb69821933edcb5686c97b4b00b903d4d50d00b9d20c3e29ac503",
+    "logs": [],
+    "blockNumber": 11645568,
+    "cumulativeGasUsed": "5395784",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "e1ceab82017f97e6880e2c6694f30b60",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.12+commit.27d51765\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[],\"name\":\"ProposalExecuted\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"LENDING_POOL_CONFIGURATOR_V2\",\"outputs\":[{\"internalType\":\"contract ILendingPoolConfiguratorV2\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"aToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"stableDebtToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"variablDebtToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"interestStrategy\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"ltv\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"liquidationThreshold\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"liquidationBonus\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"decimals\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"enableBorrowOnReserve\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"enableAsCollateral\",\"type\":\"bool\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Aave*\",\"kind\":\"dev\",\"methods\":{\"execute(address,address,address,address,address,uint256,uint256,uint256,uint8,bool,bool)\":{\"details\":\"Payload execution function, called once a proposal passed in the Aave governance\"}},\"title\":\"AssetListingProposalGenericExecutor\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Proposal payload to be executed by the Aave Governance contract via DELEGATECALL\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/assetListing/AssetListingProposalGenericExecutor.sol\":\"AssetListingProposalGenericExecutor\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/assetListing/AssetListingProposalGenericExecutor.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.6.12;\\n\\nimport {IERC20} from './interfaces/IERC20.sol';\\nimport {ILendingPoolConfiguratorV2} from './interfaces/ILendingPoolConfiguratorV2.sol';\\nimport {IProposalGenericExecutor} from './interfaces/IProposalGenericExecutor.sol';\\nimport {IOverlyingAsset} from './interfaces/IOverlyingAsset.sol';\\n\\n/**\\n * @title AssetListingProposalGenericExecutor\\n * @notice Proposal payload to be executed by the Aave Governance contract via DELEGATECALL\\n * @author Aave\\n **/\\ncontract AssetListingProposalGenericExecutor is IProposalGenericExecutor {\\n  event ProposalExecuted();\\n\\n  ILendingPoolConfiguratorV2 public constant LENDING_POOL_CONFIGURATOR_V2 =\\n    ILendingPoolConfiguratorV2(0x311Bb771e4F8952E6Da169b425E7e92d6Ac45756);\\n\\n  /**\\n   * @dev Payload execution function, called once a proposal passed in the Aave governance\\n   */\\n  function execute(\\n    address token,\\n    address aToken,\\n    address stableDebtToken,\\n    address variablDebtToken,\\n    address interestStrategy,\\n    uint256 ltv,\\n    uint256 liquidationThreshold,\\n    uint256 liquidationBonus,\\n    uint8 decimals,\\n    bool enableBorrowOnReserve,\\n    bool enableAsCollateral\\n  ) external override {\\n    require(token == IOverlyingAsset(aToken).UNDERLYING_ASSET_ADDRESS(), 'ATOKEN: WRONG_UNDERLYING_TOKEN');\\n    require(token == IOverlyingAsset(stableDebtToken).UNDERLYING_ASSET_ADDRESS(), 'STABLE_DEBT: WRONG_UNDERLYING_TOKEN');\\n    require(token == IOverlyingAsset(variablDebtToken).UNDERLYING_ASSET_ADDRESS(), 'VARIABLE_DEBT: WRONG_UNDERLYING_TOKEN');\\n    LENDING_POOL_CONFIGURATOR_V2.initReserve(\\n      aToken,\\n      stableDebtToken,\\n      variablDebtToken,\\n      decimals,\\n      interestStrategy\\n    );\\n    LENDING_POOL_CONFIGURATOR_V2.enableBorrowingOnReserve(token, enableBorrowOnReserve);\\n    if (enableAsCollateral) {\\n      LENDING_POOL_CONFIGURATOR_V2.configureReserveAsCollateral(\\n        token,\\n        ltv,\\n        liquidationThreshold,\\n        liquidationBonus\\n      );\\n    }\\n\\n    emit ProposalExecuted();\\n  }\\n}\\n\",\"keccak256\":\"0x611d48d9108f4919ae651242d4764b7851085a3f72525e18297d0c811da712fa\",\"license\":\"AGPL-3.0\"},\"contracts/assetListing/interfaces/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.6.12;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n * From https://github.com/OpenZeppelin/openzeppelin-contracts\\n */\\ninterface IERC20 {\\n  /**\\n   * @dev Returns the amount of tokens in existence.\\n   */\\n  function totalSupply() external view returns (uint256);\\n\\n  /**\\n   * @dev Returns the amount of tokens owned by `account`.\\n   */\\n  function balanceOf(address account) external view returns (uint256);\\n\\n  /**\\n   * @dev Moves `amount` tokens from the caller's account to `recipient`.\\n   *\\n   * Returns a boolean value indicating whether the operation succeeded.\\n   *\\n   * Emits a {Transfer} event.\\n   */\\n  function transfer(address recipient, uint256 amount) external returns (bool);\\n\\n  /**\\n   * @dev Returns the remaining number of tokens that `spender` will be\\n   * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n   * zero by default.\\n   *\\n   * This value changes when {approve} or {transferFrom} are called.\\n   */\\n  function allowance(address owner, address spender) external view returns (uint256);\\n\\n  /**\\n   * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n   *\\n   * Returns a boolean value indicating whether the operation succeeded.\\n   *\\n   * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n   * that someone may use both the old and the new allowance by unfortunate\\n   * transaction ordering. One possible solution to mitigate this race\\n   * condition is to first reduce the spender's allowance to 0 and set the\\n   * desired value afterwards:\\n   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n   *\\n   * Emits an {Approval} event.\\n   */\\n  function approve(address spender, uint256 amount) external returns (bool);\\n\\n  /**\\n   * @dev Moves `amount` tokens from `sender` to `recipient` using the\\n   * allowance mechanism. `amount` is then deducted from the caller's\\n   * allowance.\\n   *\\n   * Returns a boolean value indicating whether the operation succeeded.\\n   *\\n   * Emits a {Transfer} event.\\n   */\\n  function transferFrom(\\n    address sender,\\n    address recipient,\\n    uint256 amount\\n  ) external returns (bool);\\n\\n  /**\\n   * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n   * another (`to`).\\n   *\\n   * Note that `value` may be zero.\\n   */\\n  event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n  /**\\n   * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n   * a call to {approve}. `value` is the new allowance.\\n   */\\n  event Approval(address indexed owner, address indexed spender, uint256 value);\\n}\\n\",\"keccak256\":\"0x7ad740cacecc3591336815c8831c588f8b939e01864cba4fb00f25f2dbb559b0\",\"license\":\"MIT\"},\"contracts/assetListing/interfaces/ILendingPoolConfiguratorV2.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.6.12;\\n\\ninterface ILendingPoolConfiguratorV2 {\\n  /**\\n   * @dev Initializes a reserve\\n   * @param aTokenImpl  The address of the aToken contract implementation\\n   * @param stableDebtTokenImpl The address of the stable debt token contract\\n   * @param variableDebtTokenImpl The address of the variable debt token contract\\n   * @param underlyingAssetDecimals The decimals of the reserve underlying asset\\n   * @param interestRateStrategyAddress The address of the interest rate strategy contract for this reserve\\n   **/\\n  function initReserve(\\n    address aTokenImpl,\\n    address stableDebtTokenImpl,\\n    address variableDebtTokenImpl,\\n    uint8 underlyingAssetDecimals,\\n    address interestRateStrategyAddress\\n  ) external;\\n\\n  /**\\n   * @dev Configures the reserve collateralization parameters\\n   * all the values are expressed in percentages with two decimals of precision. A valid value is 10000, which means 100.00%\\n   * @param asset The address of the underlying asset of the reserve\\n   * @param ltv The loan to value of the asset when used as collateral\\n   * @param liquidationThreshold The threshold at which loans using this asset as collateral will be considered undercollateralized\\n   * @param liquidationBonus The bonus liquidators receive to liquidate this asset. The values is always above 100%. A value of 105%\\n   * means the liquidator will receive a 5% bonus\\n   **/\\n  function configureReserveAsCollateral(\\n    address asset,\\n    uint256 ltv,\\n    uint256 liquidationThreshold,\\n    uint256 liquidationBonus\\n  ) external;\\n\\n  /**\\n   * @dev Enables borrowing on a reserve\\n   * @param asset The address of the underlying asset of the reserve\\n   * @param stableBorrowRateEnabled True if stable borrow rate needs to be enabled by default on this reserve\\n   **/\\n  function enableBorrowingOnReserve(address asset, bool stableBorrowRateEnabled) external;\\n}\\n\",\"keccak256\":\"0x10889892d795d306d827fd6855ff141456d0c440974be158b8e03e5826f0cc8a\",\"license\":\"AGPL-3.0\"},\"contracts/assetListing/interfaces/IOverlyingAsset.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.6.12;\\n\\ninterface IOverlyingAsset {\\n  function UNDERLYING_ASSET_ADDRESS() external view returns (address);\\n}\\n\",\"keccak256\":\"0x2a4d2c57be60d9a2726ca9e055fdb4bef92d5c406e3634c03f2c94e728f50dc0\",\"license\":\"AGPL-3.0\"},\"contracts/assetListing/interfaces/IProposalGenericExecutor.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.6.12;\\n\\ninterface IProposalGenericExecutor {\\n  function execute(\\n    address token,\\n    address aToken,\\n    address stableDebtToken,\\n    address variablDebtToken,\\n    address interestStrategy,\\n    uint256 ltv,\\n    uint256 liquidationThreshold,\\n    uint256 liquidationBonus,\\n    uint8 decimals,\\n    bool enableBorrowOnReserve,\\n    bool enableAsCollateral\\n  ) external;\\n}\",\"keccak256\":\"0x53b1b69ad0373e603e1ab254719b746567ebd63d98ab7da1083e06d243bcff03\",\"license\":\"AGPL-3.0\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610560806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806334f6cbbb1461003b5780637fd669931461005f575b600080fd5b6100436100d6565b604080516001600160a01b039092168252519081900360200190f35b6100d4600480360361016081101561007657600080fd5b506001600160a01b0381358116916020810135821691604082013581169160608101358216916080820135169060a08101359060c08101359060e08101359060ff6101008201351690610120810135151590610140013515156100ee565b005b73311bb771e4f8952e6da169b425e7e92d6ac4575681565b896001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b15801561012757600080fd5b505afa15801561013b573d6000803e3d6000fd5b505050506040513d602081101561015157600080fd5b50516001600160a01b038c81169116146101b2576040805162461bcd60e51b815260206004820152601e60248201527f41544f4b454e3a2057524f4e475f554e4445524c59494e475f544f4b454e0000604482015290519081900360640190fd5b886001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b1580156101eb57600080fd5b505afa1580156101ff573d6000803e3d6000fd5b505050506040513d602081101561021557600080fd5b50516001600160a01b038c81169116146102605760405162461bcd60e51b81526004018080602001828103825260238152602001806104e36023913960400191505060405180910390fd5b876001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b15801561029957600080fd5b505afa1580156102ad573d6000803e3d6000fd5b505050506040513d60208110156102c357600080fd5b50516001600160a01b038c811691161461030e5760405162461bcd60e51b81526004018080602001828103825260258152602001806105066025913960400191505060405180910390fd5b60408051636e801a7160e01b81526001600160a01b038c811660048301528b811660248301528a8116604483015260ff8616606483015289166084820152905173311bb771e4f8952e6da169b425e7e92d6ac4575691636e801a719160a480830192600092919082900301818387803b15801561038a57600080fd5b505af115801561039e573d6000803e3d6000fd5b50506040805163eede87c160e01b81526001600160a01b038f1660048201528515156024820152905173311bb771e4f8952e6da169b425e7e92d6ac45756935063eede87c19250604480830192600092919082900301818387803b15801561040557600080fd5b505af1158015610419573d6000803e3d6000fd5b5050505080156104ac5760408051637c4e560b60e01b81526001600160a01b038d166004820152602481018890526044810187905260648101869052905173311bb771e4f8952e6da169b425e7e92d6ac4575691637c4e560b91608480830192600092919082900301818387803b15801561049357600080fd5b505af11580156104a7573d6000803e3d6000fd5b505050505b6040517fcf88c657fb0ecbed2a624b6b4c626e2ceda32ea9ed16ea81de6362a6d965bd0890600090a1505050505050505050505056fe535441424c455f444542543a2057524f4e475f554e4445524c59494e475f544f4b454e5641524941424c455f444542543a2057524f4e475f554e4445524c59494e475f544f4b454ea2646970667358221220758a6331a70734c7e5b491e3911c37b3ceaec9591fce9947097885fe9f13e87964736f6c634300060c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806334f6cbbb1461003b5780637fd669931461005f575b600080fd5b6100436100d6565b604080516001600160a01b039092168252519081900360200190f35b6100d4600480360361016081101561007657600080fd5b506001600160a01b0381358116916020810135821691604082013581169160608101358216916080820135169060a08101359060c08101359060e08101359060ff6101008201351690610120810135151590610140013515156100ee565b005b73311bb771e4f8952e6da169b425e7e92d6ac4575681565b896001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b15801561012757600080fd5b505afa15801561013b573d6000803e3d6000fd5b505050506040513d602081101561015157600080fd5b50516001600160a01b038c81169116146101b2576040805162461bcd60e51b815260206004820152601e60248201527f41544f4b454e3a2057524f4e475f554e4445524c59494e475f544f4b454e0000604482015290519081900360640190fd5b886001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b1580156101eb57600080fd5b505afa1580156101ff573d6000803e3d6000fd5b505050506040513d602081101561021557600080fd5b50516001600160a01b038c81169116146102605760405162461bcd60e51b81526004018080602001828103825260238152602001806104e36023913960400191505060405180910390fd5b876001600160a01b031663b16a19de6040518163ffffffff1660e01b815260040160206040518083038186803b15801561029957600080fd5b505afa1580156102ad573d6000803e3d6000fd5b505050506040513d60208110156102c357600080fd5b50516001600160a01b038c811691161461030e5760405162461bcd60e51b81526004018080602001828103825260258152602001806105066025913960400191505060405180910390fd5b60408051636e801a7160e01b81526001600160a01b038c811660048301528b811660248301528a8116604483015260ff8616606483015289166084820152905173311bb771e4f8952e6da169b425e7e92d6ac4575691636e801a719160a480830192600092919082900301818387803b15801561038a57600080fd5b505af115801561039e573d6000803e3d6000fd5b50506040805163eede87c160e01b81526001600160a01b038f1660048201528515156024820152905173311bb771e4f8952e6da169b425e7e92d6ac45756935063eede87c19250604480830192600092919082900301818387803b15801561040557600080fd5b505af1158015610419573d6000803e3d6000fd5b5050505080156104ac5760408051637c4e560b60e01b81526001600160a01b038d166004820152602481018890526044810187905260648101869052905173311bb771e4f8952e6da169b425e7e92d6ac4575691637c4e560b91608480830192600092919082900301818387803b15801561049357600080fd5b505af11580156104a7573d6000803e3d6000fd5b505050505b6040517fcf88c657fb0ecbed2a624b6b4c626e2ceda32ea9ed16ea81de6362a6d965bd0890600090a1505050505050505050505056fe535441424c455f444542543a2057524f4e475f554e4445524c59494e475f544f4b454e5641524941424c455f444542543a2057524f4e475f554e4445524c59494e475f544f4b454ea2646970667358221220758a6331a70734c7e5b491e3911c37b3ceaec9591fce9947097885fe9f13e87964736f6c634300060c0033",
+  "devdoc": {
+    "author": "Aave*",
+    "kind": "dev",
+    "methods": {
+      "execute(address,address,address,address,address,uint256,uint256,uint256,uint8,bool,bool)": {
+        "details": "Payload execution function, called once a proposal passed in the Aave governance"
+      }
+    },
+    "title": "AssetListingProposalGenericExecutor",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Proposal payload to be executed by the Aave Governance contract via DELEGATECALL",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

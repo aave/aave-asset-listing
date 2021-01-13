@@ -1,7 +1,6 @@
 
 #Buidler files
 cache
-artifacts
 
 node_modules
 dist/

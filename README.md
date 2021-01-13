@@ -17,7 +17,7 @@ You must have followed all the previous step from the [guide](https://docs.aave.
 
 ## Set the environment variables.
 
-Modify the `.env` file to match with your tokens addresses and your risk parameters.
+Copy the `.env.example` file, rename it to `.env` and update it to match with your tokens addresses and your risk parameters.
 
 Example for the Curve Token listing: 
 
@@ -32,6 +32,7 @@ INTEREST_STRATEGY=0xe3a3de71b827cb73663a24cdb6243ba7f986cc3b
 LTV=4000
 LIQUIDATION_THRESHOLD=5500
 LIQUIDATION_BONUS=11500
+RESERVE_FACTOR=500
 DECIMALS=18
 ENABLE_BORROW=false
 ENABLE_AS_COLLATERAL=true

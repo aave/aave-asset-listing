@@ -1,7 +1,6 @@
 import { task } from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
 import { getContractAt } from '@nomiclabs/hardhat-ethers/dist/src/helpers';
-import { ethers } from 'ethers';
 
 const bs58 = require('bs58');
 require('dotenv').config();
@@ -15,6 +14,7 @@ const {
   LTV,
   LIQUIDATION_THRESHOLD,
   LIQUIDATION_BONUS,
+  RESERVE_FACTOR,
   DECIMALS,
   ENABLE_BORROW,
   ENABLE_AS_COLLATERAL,
@@ -46,6 +46,7 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       'uint',
       'uint',
       'uint',
+      'uint',
       'uint8',
       'bool',
       'bool',
@@ -59,6 +60,7 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       LTV,
       LIQUIDATION_THRESHOLD,
       LIQUIDATION_BONUS,
+      RESERVE_FACTOR,
       DECIMALS,
       ENABLE_BORROW === 'true',
       ENABLE_AS_COLLATERAL === 'true',
@@ -69,11 +71,10 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       .slice(2)
       .toString('hex')}`;
 
-    const proposalTx = await (
+    await (
       await gov
         .connect(proposer)
         .create(AAVE_SHORT_EXECUTOR, [genericPayloadAddress], ['0'], [executeSignature], [callData], [true], ipfsEncoded)
     ).wait();
-    const proposalId = proposalTx.events?.[0].args?.id;
-    console.log('Your Proposal has been submitted: ID: ', proposalId);
+    console.log('Your Proposal has been submitted');
   });

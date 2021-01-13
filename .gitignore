@@ -1,4 +1,3 @@
-.env
 
 #Buidler files
 cache
@@ -9,7 +8,7 @@ dist/
 build/
 .vscode
 .idea
-
+.env
 coverage
 .coverage_artifacts
 .coverage_cache

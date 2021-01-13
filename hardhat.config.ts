@@ -10,7 +10,9 @@ import 'hardhat-gas-reporter';
 
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
-import './tasks/list-new-asset';
+if (process.env.SKIP_LOAD !== 'true') {
+  require('./tasks/list-new-asset');
+}
 
 export const BUIDLEREVM_CHAIN_ID = 31337;
 const balance = '1000000000000000000000000';

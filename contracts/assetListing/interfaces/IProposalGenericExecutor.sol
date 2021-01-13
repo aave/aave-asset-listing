@@ -11,6 +11,7 @@ interface IProposalGenericExecutor {
     uint256 ltv,
     uint256 liquidationThreshold,
     uint256 liquidationBonus,
+    uint256 reserveFactor,
     uint8 decimals,
     bool enableBorrowOnReserve,
     bool enableAsCollateral

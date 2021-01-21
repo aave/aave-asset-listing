@@ -2,8 +2,19 @@
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
-// simplified interface to expose functions
+// simplified interface to expose functions added events for tests
 interface IAaveGovernanceV2 {
+  /**
+   Added for test purposes
+   **/
+  event ReserveInitialized(
+    address indexed asset,
+    address indexed aToken,
+    address stableDebtToken,
+    address variableDebtToken,
+    address interestRateStrategyAddress
+  );
+  enum ProposalState {Pending, Canceled, Active, Failed, Succeeded, Queued, Expired, Executed}
   /**
    * @dev Creates a Proposal (needs Proposition Power of creator > Threshold)
    * @param executor The ExecutorWithTimelock contract that will execute the proposal
@@ -66,4 +77,13 @@ interface IAaveGovernanceV2 {
     bytes32 r,
     bytes32 s
   ) external;
+
+  /**
+   * @dev Getter of the proposal count (the current number of proposals ever created)
+   * @return the proposal count
+   **/
+  function getProposalsCount() external view returns (uint256);
+
+  function getProposalState(uint256 proposalId) external view returns (ProposalState);
+  function getGuardian() external view returns (address);
 }

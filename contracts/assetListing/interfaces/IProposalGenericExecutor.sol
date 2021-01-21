@@ -13,6 +13,7 @@ interface IProposalGenericExecutor {
     uint256 liquidationBonus,
     uint256 reserveFactor,
     uint8 decimals,
+    bool enableBorrow,
     bool enableBorrowOnReserve,
     bool enableAsCollateral
   ) external;

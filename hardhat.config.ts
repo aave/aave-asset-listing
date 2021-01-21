@@ -1,17 +1,16 @@
 import { HardhatUserConfig } from 'hardhat/config';
-import path from 'path';
-import fs from 'fs';
 
 import 'hardhat-typechain';
 import 'solidity-coverage';
-import '@nomiclabs/hardhat-waffle';
 import 'temp-hardhat-etherscan';
 import 'hardhat-gas-reporter';
-
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-deploy';
+import '@nomiclabs/hardhat-waffle';
+
 if (process.env.SKIP_LOAD !== 'true') {
-  require('./tasks/list-new-asset');
+  // eslint-disable-next-line global-require
+  require('./tasks/list-new-asset.ts');
 }
 
 export const BUIDLEREVM_CHAIN_ID = 31337;

@@ -1,18 +1,19 @@
 # Aave Governance V2: Listing a new asset
 
-This repository facilitates the last step of the process of listing a new asset to the Aave protocol.
+This repository facilitates the last step of the process of listing a new asset to the Aave protocol, that is creating the on-chain proposal to the Aave Governance.
 
-You must have followed all the previous step from the [guide](https://docs.aave.com/developers/protocol-governance/governance/propose-your-token-as-new-aave-asset)
+You must have followed all the previous steps from the [guide](https://docs.aave.com/developers/protocol-governance/governance/propose-your-token-as-new-aave-asset)
 
 ## Requirements 
-- You must have agreed with the Aave Genesis team on risk parameters for your token during an ARC.
+Following the [guide](https://docs.aave.com/developers/protocol-governance/governance/propose-your-token-as-new-aave-asset)
+- You must have agreed with the Aave Genesis team on risk parameters for your token during an ARC on the governance forum.
 - You must have deployed the AToken, VariableDebtToken, StableDebtToken, InterestStrategy overlying contracts for your token.
-- You must have created the associated AIP, uploaded it to IPFS.
+- You must have created the associated AIP ([here](https://github.com/aave/aip))
 - You must have enough Proposition Power.
 
 ## Set the environment variables.
 
-Copy the `.env.example` file, rename it to `.env` and update it to match with your tokens addresses and your risk parameters.
+Copy the `.default.env` file, rename it to `.env` and update it to match with your tokens addresses and your risk parameters.
 
 Example for the Curve Token listing: 
 
@@ -31,6 +32,7 @@ RESERVE_FACTOR=500
 DECIMALS=18
 ENABLE_BORROW=false
 ENABLE_AS_COLLATERAL=true
+ENABLE_AS_RESERVE_COLLATERAL=false
 IPFS_HASH=QmNfU4FMdQriJVQeqQTNxgY63iSJVh8yCJf8aFDkQDjaLQ
 ```
 
@@ -55,4 +57,7 @@ In the container run:
 `$ npm run propose-new-asset:kovan` for kovan
 
 `$ npm run propose-new-asset:main` for mainnet
+
+## Test
+`$ npm run test`
 

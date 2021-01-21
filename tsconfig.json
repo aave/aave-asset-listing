@@ -1,19 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2019",
     "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist",
-    "resolveJsonModule": true,
-    "downlevelIteration": true
+    "outDir": "dist"
   },
-  "include": ["./**/*"],
+  "include": ["./tasks", "./test"],
   "files": [
     "./hardhat.config.ts",
-    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.d.ts",
-    "node_modules/hardhat-typechain/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.d.ts"
+    "node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts",
+    "node_modules/buidler-typechain/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/buidler-waffle/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/buidler-etherscan/src/type-extensions.d.ts"
   ]
 }

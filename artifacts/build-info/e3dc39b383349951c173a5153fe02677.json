@@ -1,0 +1,1556 @@
+{
+  "id": "e3dc39b383349951c173a5153fe02677",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.7.5",
+  "solcLongVersion": "0.7.5+commit.eb77ed08",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/assetListing/interfaces/IAaveGovernanceV2.sol": {
+        "content": "// SPDX-License-Identifier: AGPL-3.0\npragma solidity 0.7.5;\npragma abicoder v2;\n\n// simplified interface to expose functions added events for tests\ninterface IAaveGovernanceV2 {\n  /**\n   Added for test purposes\n   **/\n  event ReserveInitialized(\n    address indexed asset,\n    address indexed aToken,\n    address stableDebtToken,\n    address variableDebtToken,\n    address interestRateStrategyAddress\n  );\n  enum ProposalState {Pending, Canceled, Active, Failed, Succeeded, Queued, Expired, Executed}\n  /**\n   * @dev Creates a Proposal (needs Proposition Power of creator > Threshold)\n   * @param executor The ExecutorWithTimelock contract that will execute the proposal\n   * @param targets list of contracts called by proposal's associated transactions\n   * @param values list of value in wei for each propoposal's associated transaction\n   * @param signatures list of function signatures (can be empty) to be used when created the callData\n   * @param calldatas list of calldatas: if associated signature empty, calldata ready, else calldata is arguments\n   * @param withDelegatecalls if true, transaction delegatecalls the taget, else calls the target\n   * @param ipfsHash IPFS hash of the proposal\n   **/\n  function create(\n    address executor,\n    address[] memory targets,\n    uint256[] memory values,\n    string[] memory signatures,\n    bytes[] memory calldatas,\n    bool[] memory withDelegatecalls,\n    bytes32 ipfsHash\n  ) external returns (uint256);\n\n  /**\n   * @dev Cancels a Proposal,\n   * either at anytime by guardian\n   * or when proposal is Pending/Active and threshold no longer reached\n   * @param proposalId id of the proposal\n   **/\n  function cancel(uint256 proposalId) external;\n\n  /**\n   * @dev Queue the proposal (If Proposal Succeeded)\n   * @param proposalId id of the proposal to queue\n   **/\n  function queue(uint256 proposalId) external;\n\n  /**\n   * @dev Execute the proposal (If Proposal Queued)\n   * @param proposalId id of the proposal to execute\n   **/\n  function execute(uint256 proposalId) external payable;\n\n  /**\n   * @dev Function allowing msg.sender to vote for/against a proposal\n   * @param proposalId id of the proposal\n   * @param support boolean, true = vote for, false = vote against\n   **/\n  function submitVote(uint256 proposalId, bool support) external;\n\n  /**\n   * @dev Function to register the vote of user that has voted offchain via signature\n   * @param proposalId id of the proposal\n   * @param support boolean, true = vote for, false = vote against\n   * @param v v part of the voter signature\n   * @param r r part of the voter signature\n   * @param s s part of the voter signature\n   **/\n  function submitVoteBySignature(\n    uint256 proposalId,\n    bool support,\n    uint8 v,\n    bytes32 r,\n    bytes32 s\n  ) external;\n\n  /**\n   * @dev Getter of the proposal count (the current number of proposals ever created)\n   * @return the proposal count\n   **/\n  function getProposalsCount() external view returns (uint256);\n\n  function getProposalState(uint256 proposalId) external view returns (ProposalState);\n  function getGuardian() external view returns (address);\n}\n"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "evmVersion": "istanbul",
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata",
+            "devdoc",
+            "userdoc",
+            "storageLayout",
+            "evm.gasEstimates"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      },
+      "metadata": {
+        "useLiteralContent": true
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/assetListing/interfaces/IAaveGovernanceV2.sol": {
+        "IAaveGovernanceV2": {
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "aToken",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "stableDebtToken",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "variableDebtToken",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "interestRateStrategyAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "ReserveInitialized",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "cancel",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "targets",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "uint256[]",
+                  "name": "values",
+                  "type": "uint256[]"
+                },
+                {
+                  "internalType": "string[]",
+                  "name": "signatures",
+                  "type": "string[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "calldatas",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bool[]",
+                  "name": "withDelegatecalls",
+                  "type": "bool[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "ipfsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "create",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "execute",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getGuardian",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "getProposalState",
+              "outputs": [
+                {
+                  "internalType": "enum IAaveGovernanceV2.ProposalState",
+                  "name": "",
+                  "type": "uint8"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getProposalsCount",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "queue",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "support",
+                  "type": "bool"
+                }
+              ],
+              "name": "submitVote",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "proposalId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "support",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "v",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "r",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "s",
+                  "type": "bytes32"
+                }
+              ],
+              "name": "submitVoteBySignature",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ],
+          "devdoc": {
+            "kind": "dev",
+            "methods": {
+              "cancel(uint256)": {
+                "details": "Cancels a Proposal, either at anytime by guardian or when proposal is Pending/Active and threshold no longer reached",
+                "params": {
+                  "proposalId": "id of the proposal*"
+                }
+              },
+              "create(address,address[],uint256[],string[],bytes[],bool[],bytes32)": {
+                "details": "Creates a Proposal (needs Proposition Power of creator > Threshold)",
+                "params": {
+                  "calldatas": "list of calldatas: if associated signature empty, calldata ready, else calldata is arguments",
+                  "executor": "The ExecutorWithTimelock contract that will execute the proposal",
+                  "ipfsHash": "IPFS hash of the proposal*",
+                  "signatures": "list of function signatures (can be empty) to be used when created the callData",
+                  "targets": "list of contracts called by proposal's associated transactions",
+                  "values": "list of value in wei for each propoposal's associated transaction",
+                  "withDelegatecalls": "if true, transaction delegatecalls the taget, else calls the target"
+                }
+              },
+              "execute(uint256)": {
+                "details": "Execute the proposal (If Proposal Queued)",
+                "params": {
+                  "proposalId": "id of the proposal to execute*"
+                }
+              },
+              "getProposalsCount()": {
+                "details": "Getter of the proposal count (the current number of proposals ever created)",
+                "returns": {
+                  "_0": "the proposal count*"
+                }
+              },
+              "queue(uint256)": {
+                "details": "Queue the proposal (If Proposal Succeeded)",
+                "params": {
+                  "proposalId": "id of the proposal to queue*"
+                }
+              },
+              "submitVote(uint256,bool)": {
+                "details": "Function allowing msg.sender to vote for/against a proposal",
+                "params": {
+                  "proposalId": "id of the proposal",
+                  "support": "boolean, true = vote for, false = vote against*"
+                }
+              },
+              "submitVoteBySignature(uint256,bool,uint8,bytes32,bytes32)": {
+                "details": "Function to register the vote of user that has voted offchain via signature",
+                "params": {
+                  "proposalId": "id of the proposal",
+                  "r": "r part of the voter signature",
+                  "s": "s part of the voter signature*",
+                  "support": "boolean, true = vote for, false = vote against",
+                  "v": "v part of the voter signature"
+                }
+              }
+            },
+            "version": 1
+          },
+          "evm": {
+            "bytecode": {
+              "generatedSources": [],
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "generatedSources": [],
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "gasEstimates": null,
+            "methodIdentifiers": {
+              "cancel(uint256)": "40e58ee5",
+              "create(address,address[],uint256[],string[],bytes[],bool[],bytes32)": "f8741a9c",
+              "execute(uint256)": "fe0d94c1",
+              "getGuardian()": "a75b87d2",
+              "getProposalState(uint256)": "9080936f",
+              "getProposalsCount()": "98e527d3",
+              "queue(uint256)": "ddf0b009",
+              "submitVote(uint256,bool)": "612c56fa",
+              "submitVoteBySignature(uint256,bool,uint8,bytes32,bytes32)": "af1e0bd3"
+            }
+          },
+          "metadata": "{\"compiler\":{\"version\":\"0.7.5+commit.eb77ed08\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"aToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"stableDebtToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"variableDebtToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"interestRateStrategyAddress\",\"type\":\"address\"}],\"name\":\"ReserveInitialized\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"}],\"name\":\"cancel\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"executor\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"targets\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"},{\"internalType\":\"string[]\",\"name\":\"signatures\",\"type\":\"string[]\"},{\"internalType\":\"bytes[]\",\"name\":\"calldatas\",\"type\":\"bytes[]\"},{\"internalType\":\"bool[]\",\"name\":\"withDelegatecalls\",\"type\":\"bool[]\"},{\"internalType\":\"bytes32\",\"name\":\"ipfsHash\",\"type\":\"bytes32\"}],\"name\":\"create\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"}],\"name\":\"execute\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGuardian\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"}],\"name\":\"getProposalState\",\"outputs\":[{\"internalType\":\"enum IAaveGovernanceV2.ProposalState\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getProposalsCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"}],\"name\":\"queue\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"support\",\"type\":\"bool\"}],\"name\":\"submitVote\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"proposalId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"support\",\"type\":\"bool\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"submitVoteBySignature\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"cancel(uint256)\":{\"details\":\"Cancels a Proposal, either at anytime by guardian or when proposal is Pending/Active and threshold no longer reached\",\"params\":{\"proposalId\":\"id of the proposal*\"}},\"create(address,address[],uint256[],string[],bytes[],bool[],bytes32)\":{\"details\":\"Creates a Proposal (needs Proposition Power of creator > Threshold)\",\"params\":{\"calldatas\":\"list of calldatas: if associated signature empty, calldata ready, else calldata is arguments\",\"executor\":\"The ExecutorWithTimelock contract that will execute the proposal\",\"ipfsHash\":\"IPFS hash of the proposal*\",\"signatures\":\"list of function signatures (can be empty) to be used when created the callData\",\"targets\":\"list of contracts called by proposal's associated transactions\",\"values\":\"list of value in wei for each propoposal's associated transaction\",\"withDelegatecalls\":\"if true, transaction delegatecalls the taget, else calls the target\"}},\"execute(uint256)\":{\"details\":\"Execute the proposal (If Proposal Queued)\",\"params\":{\"proposalId\":\"id of the proposal to execute*\"}},\"getProposalsCount()\":{\"details\":\"Getter of the proposal count (the current number of proposals ever created)\",\"returns\":{\"_0\":\"the proposal count*\"}},\"queue(uint256)\":{\"details\":\"Queue the proposal (If Proposal Succeeded)\",\"params\":{\"proposalId\":\"id of the proposal to queue*\"}},\"submitVote(uint256,bool)\":{\"details\":\"Function allowing msg.sender to vote for/against a proposal\",\"params\":{\"proposalId\":\"id of the proposal\",\"support\":\"boolean, true = vote for, false = vote against*\"}},\"submitVoteBySignature(uint256,bool,uint8,bytes32,bytes32)\":{\"details\":\"Function to register the vote of user that has voted offchain via signature\",\"params\":{\"proposalId\":\"id of the proposal\",\"r\":\"r part of the voter signature\",\"s\":\"s part of the voter signature*\",\"support\":\"boolean, true = vote for, false = vote against\",\"v\":\"v part of the voter signature\"}}},\"version\":1},\"userdoc\":{\"events\":{\"ReserveInitialized(address,address,address,address,address)\":{\"notice\":\"Added for test purposes*\"}},\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/assetListing/interfaces/IAaveGovernanceV2.sol\":\"IAaveGovernanceV2\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/assetListing/interfaces/IAaveGovernanceV2.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0\\npragma solidity 0.7.5;\\npragma abicoder v2;\\n\\n// simplified interface to expose functions added events for tests\\ninterface IAaveGovernanceV2 {\\n  /**\\n   Added for test purposes\\n   **/\\n  event ReserveInitialized(\\n    address indexed asset,\\n    address indexed aToken,\\n    address stableDebtToken,\\n    address variableDebtToken,\\n    address interestRateStrategyAddress\\n  );\\n  enum ProposalState {Pending, Canceled, Active, Failed, Succeeded, Queued, Expired, Executed}\\n  /**\\n   * @dev Creates a Proposal (needs Proposition Power of creator > Threshold)\\n   * @param executor The ExecutorWithTimelock contract that will execute the proposal\\n   * @param targets list of contracts called by proposal's associated transactions\\n   * @param values list of value in wei for each propoposal's associated transaction\\n   * @param signatures list of function signatures (can be empty) to be used when created the callData\\n   * @param calldatas list of calldatas: if associated signature empty, calldata ready, else calldata is arguments\\n   * @param withDelegatecalls if true, transaction delegatecalls the taget, else calls the target\\n   * @param ipfsHash IPFS hash of the proposal\\n   **/\\n  function create(\\n    address executor,\\n    address[] memory targets,\\n    uint256[] memory values,\\n    string[] memory signatures,\\n    bytes[] memory calldatas,\\n    bool[] memory withDelegatecalls,\\n    bytes32 ipfsHash\\n  ) external returns (uint256);\\n\\n  /**\\n   * @dev Cancels a Proposal,\\n   * either at anytime by guardian\\n   * or when proposal is Pending/Active and threshold no longer reached\\n   * @param proposalId id of the proposal\\n   **/\\n  function cancel(uint256 proposalId) external;\\n\\n  /**\\n   * @dev Queue the proposal (If Proposal Succeeded)\\n   * @param proposalId id of the proposal to queue\\n   **/\\n  function queue(uint256 proposalId) external;\\n\\n  /**\\n   * @dev Execute the proposal (If Proposal Queued)\\n   * @param proposalId id of the proposal to execute\\n   **/\\n  function execute(uint256 proposalId) external payable;\\n\\n  /**\\n   * @dev Function allowing msg.sender to vote for/against a proposal\\n   * @param proposalId id of the proposal\\n   * @param support boolean, true = vote for, false = vote against\\n   **/\\n  function submitVote(uint256 proposalId, bool support) external;\\n\\n  /**\\n   * @dev Function to register the vote of user that has voted offchain via signature\\n   * @param proposalId id of the proposal\\n   * @param support boolean, true = vote for, false = vote against\\n   * @param v v part of the voter signature\\n   * @param r r part of the voter signature\\n   * @param s s part of the voter signature\\n   **/\\n  function submitVoteBySignature(\\n    uint256 proposalId,\\n    bool support,\\n    uint8 v,\\n    bytes32 r,\\n    bytes32 s\\n  ) external;\\n\\n  /**\\n   * @dev Getter of the proposal count (the current number of proposals ever created)\\n   * @return the proposal count\\n   **/\\n  function getProposalsCount() external view returns (uint256);\\n\\n  function getProposalState(uint256 proposalId) external view returns (ProposalState);\\n  function getGuardian() external view returns (address);\\n}\\n\",\"keccak256\":\"0xd3ac9a4c3e5844673bc835e125fa78e179a68a477c8cae38af8ac0d2f7f403ae\",\"license\":\"AGPL-3.0\"}},\"version\":1}",
+          "storageLayout": {
+            "storage": [],
+            "types": null
+          },
+          "userdoc": {
+            "events": {
+              "ReserveInitialized(address,address,address,address,address)": {
+                "notice": "Added for test purposes*"
+              }
+            },
+            "kind": "user",
+            "methods": {},
+            "version": 1
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/assetListing/interfaces/IAaveGovernanceV2.sol": {
+        "ast": {
+          "absolutePath": "contracts/assetListing/interfaces/IAaveGovernanceV2.sol",
+          "exportedSymbols": {
+            "IAaveGovernanceV2": [
+              108
+            ]
+          },
+          "id": 109,
+          "license": "AGPL-3.0",
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                "0.7",
+                ".5"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "37:22:0"
+            },
+            {
+              "id": 2,
+              "literals": [
+                "abicoder",
+                "v2"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "60:19:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "fullyImplemented": false,
+              "id": 108,
+              "linearizedBaseContracts": [
+                108
+              ],
+              "name": "IAaveGovernanceV2",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "anonymous": false,
+                  "documentation": {
+                    "id": 3,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "180:37:0",
+                    "text": "Added for test purposes*"
+                  },
+                  "id": 15,
+                  "name": "ReserveInitialized",
+                  "nodeType": "EventDefinition",
+                  "parameters": {
+                    "id": 14,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 5,
+                        "indexed": true,
+                        "mutability": "mutable",
+                        "name": "asset",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 15,
+                        "src": "250:21:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 4,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "250:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 7,
+                        "indexed": true,
+                        "mutability": "mutable",
+                        "name": "aToken",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 15,
+                        "src": "277:22:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 6,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "277:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 9,
+                        "indexed": false,
+                        "mutability": "mutable",
+                        "name": "stableDebtToken",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 15,
+                        "src": "305:23:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 8,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "305:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 11,
+                        "indexed": false,
+                        "mutability": "mutable",
+                        "name": "variableDebtToken",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 15,
+                        "src": "334:25:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 10,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "334:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 13,
+                        "indexed": false,
+                        "mutability": "mutable",
+                        "name": "interestRateStrategyAddress",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 15,
+                        "src": "365:35:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 12,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "365:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "244:160:0"
+                  },
+                  "src": "220:185:0"
+                },
+                {
+                  "canonicalName": "IAaveGovernanceV2.ProposalState",
+                  "id": 24,
+                  "members": [
+                    {
+                      "id": 16,
+                      "name": "Pending",
+                      "nodeType": "EnumValue",
+                      "src": "428:7:0"
+                    },
+                    {
+                      "id": 17,
+                      "name": "Canceled",
+                      "nodeType": "EnumValue",
+                      "src": "437:8:0"
+                    },
+                    {
+                      "id": 18,
+                      "name": "Active",
+                      "nodeType": "EnumValue",
+                      "src": "447:6:0"
+                    },
+                    {
+                      "id": 19,
+                      "name": "Failed",
+                      "nodeType": "EnumValue",
+                      "src": "455:6:0"
+                    },
+                    {
+                      "id": 20,
+                      "name": "Succeeded",
+                      "nodeType": "EnumValue",
+                      "src": "463:9:0"
+                    },
+                    {
+                      "id": 21,
+                      "name": "Queued",
+                      "nodeType": "EnumValue",
+                      "src": "474:6:0"
+                    },
+                    {
+                      "id": 22,
+                      "name": "Expired",
+                      "nodeType": "EnumValue",
+                      "src": "482:7:0"
+                    },
+                    {
+                      "id": 23,
+                      "name": "Executed",
+                      "nodeType": "EnumValue",
+                      "src": "491:8:0"
+                    }
+                  ],
+                  "name": "ProposalState",
+                  "nodeType": "EnumDefinition",
+                  "src": "408:92:0"
+                },
+                {
+                  "documentation": {
+                    "id": 25,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "503:705:0",
+                    "text": " @dev Creates a Proposal (needs Proposition Power of creator > Threshold)\n @param executor The ExecutorWithTimelock contract that will execute the proposal\n @param targets list of contracts called by proposal's associated transactions\n @param values list of value in wei for each propoposal's associated transaction\n @param signatures list of function signatures (can be empty) to be used when created the callData\n @param calldatas list of calldatas: if associated signature empty, calldata ready, else calldata is arguments\n @param withDelegatecalls if true, transaction delegatecalls the taget, else calls the target\n @param ipfsHash IPFS hash of the proposal*"
+                  },
+                  "functionSelector": "f8741a9c",
+                  "id": 49,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "create",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 45,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 27,
+                        "mutability": "mutable",
+                        "name": "executor",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1232:16:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 26,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1232:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 30,
+                        "mutability": "mutable",
+                        "name": "targets",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1254:24:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                          "typeString": "address[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 28,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1254:7:0",
+                            "stateMutability": "nonpayable",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 29,
+                          "nodeType": "ArrayTypeName",
+                          "src": "1254:9:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                            "typeString": "address[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 33,
+                        "mutability": "mutable",
+                        "name": "values",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1284:23:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                          "typeString": "uint256[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 31,
+                            "name": "uint256",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1284:7:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          "id": 32,
+                          "nodeType": "ArrayTypeName",
+                          "src": "1284:9:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                            "typeString": "uint256[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 36,
+                        "mutability": "mutable",
+                        "name": "signatures",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1313:26:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_string_memory_ptr_$dyn_memory_ptr",
+                          "typeString": "string[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 34,
+                            "name": "string",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1313:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_storage_ptr",
+                              "typeString": "string"
+                            }
+                          },
+                          "id": 35,
+                          "nodeType": "ArrayTypeName",
+                          "src": "1313:8:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_string_storage_$dyn_storage_ptr",
+                            "typeString": "string[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 39,
+                        "mutability": "mutable",
+                        "name": "calldatas",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1345:24:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_bytes_memory_ptr_$dyn_memory_ptr",
+                          "typeString": "bytes[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 37,
+                            "name": "bytes",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1345:5:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_storage_ptr",
+                              "typeString": "bytes"
+                            }
+                          },
+                          "id": 38,
+                          "nodeType": "ArrayTypeName",
+                          "src": "1345:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
+                            "typeString": "bytes[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 42,
+                        "mutability": "mutable",
+                        "name": "withDelegatecalls",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1375:31:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_bool_$dyn_memory_ptr",
+                          "typeString": "bool[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 40,
+                            "name": "bool",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "1375:4:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "id": 41,
+                          "nodeType": "ArrayTypeName",
+                          "src": "1375:6:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_bool_$dyn_storage_ptr",
+                            "typeString": "bool[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 44,
+                        "mutability": "mutable",
+                        "name": "ipfsHash",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1412:16:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        "typeName": {
+                          "id": 43,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1412:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1226:206:0"
+                  },
+                  "returnParameters": {
+                    "id": 48,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 47,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 49,
+                        "src": "1451:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 46,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1451:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1450:9:0"
+                  },
+                  "scope": 108,
+                  "src": "1211:249:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 50,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "1464:189:0",
+                    "text": " @dev Cancels a Proposal,\n either at anytime by guardian\n or when proposal is Pending/Active and threshold no longer reached\n @param proposalId id of the proposal*"
+                  },
+                  "functionSelector": "40e58ee5",
+                  "id": 55,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "cancel",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 53,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 52,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 55,
+                        "src": "1672:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 51,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1672:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1671:20:0"
+                  },
+                  "returnParameters": {
+                    "id": 54,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1700:0:0"
+                  },
+                  "scope": 108,
+                  "src": "1656:45:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 56,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "1705:114:0",
+                    "text": " @dev Queue the proposal (If Proposal Succeeded)\n @param proposalId id of the proposal to queue*"
+                  },
+                  "functionSelector": "ddf0b009",
+                  "id": 61,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "queue",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 59,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 58,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 61,
+                        "src": "1837:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 57,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1837:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "1836:20:0"
+                  },
+                  "returnParameters": {
+                    "id": 60,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "1865:0:0"
+                  },
+                  "scope": 108,
+                  "src": "1822:44:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 62,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "1870:115:0",
+                    "text": " @dev Execute the proposal (If Proposal Queued)\n @param proposalId id of the proposal to execute*"
+                  },
+                  "functionSelector": "fe0d94c1",
+                  "id": 67,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "execute",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 65,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 64,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 67,
+                        "src": "2005:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 63,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2005:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "2004:20:0"
+                  },
+                  "returnParameters": {
+                    "id": 66,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "2041:0:0"
+                  },
+                  "scope": 108,
+                  "src": "1988:54:0",
+                  "stateMutability": "payable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 68,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "2046:189:0",
+                    "text": " @dev Function allowing msg.sender to vote for/against a proposal\n @param proposalId id of the proposal\n @param support boolean, true = vote for, false = vote against*"
+                  },
+                  "functionSelector": "612c56fa",
+                  "id": 75,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "submitVote",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 73,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 70,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 75,
+                        "src": "2258:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 69,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2258:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 72,
+                        "mutability": "mutable",
+                        "name": "support",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 75,
+                        "src": "2278:12:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "typeName": {
+                          "id": 71,
+                          "name": "bool",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2278:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "2257:34:0"
+                  },
+                  "returnParameters": {
+                    "id": 74,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "2300:0:0"
+                  },
+                  "scope": 108,
+                  "src": "2238:63:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 76,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "2305:337:0",
+                    "text": " @dev Function to register the vote of user that has voted offchain via signature\n @param proposalId id of the proposal\n @param support boolean, true = vote for, false = vote against\n @param v v part of the voter signature\n @param r r part of the voter signature\n @param s s part of the voter signature*"
+                  },
+                  "functionSelector": "af1e0bd3",
+                  "id": 89,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "submitVoteBySignature",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 87,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 78,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "2681:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 77,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2681:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 80,
+                        "mutability": "mutable",
+                        "name": "support",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "2705:12:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "typeName": {
+                          "id": 79,
+                          "name": "bool",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2705:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 82,
+                        "mutability": "mutable",
+                        "name": "v",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "2723:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint8",
+                          "typeString": "uint8"
+                        },
+                        "typeName": {
+                          "id": 81,
+                          "name": "uint8",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2723:5:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint8",
+                            "typeString": "uint8"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 84,
+                        "mutability": "mutable",
+                        "name": "r",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "2736:9:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        "typeName": {
+                          "id": 83,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2736:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 86,
+                        "mutability": "mutable",
+                        "name": "s",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 89,
+                        "src": "2751:9:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        },
+                        "typeName": {
+                          "id": 85,
+                          "name": "bytes32",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2751:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes32",
+                            "typeString": "bytes32"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "2675:89:0"
+                  },
+                  "returnParameters": {
+                    "id": 88,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "2773:0:0"
+                  },
+                  "scope": 108,
+                  "src": "2645:129:0",
+                  "stateMutability": "nonpayable",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "documentation": {
+                    "id": 90,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "2778:128:0",
+                    "text": " @dev Getter of the proposal count (the current number of proposals ever created)\n @return the proposal count*"
+                  },
+                  "functionSelector": "98e527d3",
+                  "id": 95,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "getProposalsCount",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 91,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "2935:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 94,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 93,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 95,
+                        "src": "2961:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 92,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "2961:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "2960:9:0"
+                  },
+                  "scope": 108,
+                  "src": "2909:61:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "9080936f",
+                  "id": 102,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "getProposalState",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 98,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 97,
+                        "mutability": "mutable",
+                        "name": "proposalId",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 102,
+                        "src": "3000:18:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 96,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "3000:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "2999:20:0"
+                  },
+                  "returnParameters": {
+                    "id": 101,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 100,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 102,
+                        "src": "3043:13:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_enum$_ProposalState_$24",
+                          "typeString": "enum IAaveGovernanceV2.ProposalState"
+                        },
+                        "typeName": {
+                          "id": 99,
+                          "name": "ProposalState",
+                          "nodeType": "UserDefinedTypeName",
+                          "referencedDeclaration": 24,
+                          "src": "3043:13:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_enum$_ProposalState_$24",
+                            "typeString": "enum IAaveGovernanceV2.ProposalState"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "3042:15:0"
+                  },
+                  "scope": 108,
+                  "src": "2974:84:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "external"
+                },
+                {
+                  "functionSelector": "a75b87d2",
+                  "id": 107,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "getGuardian",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 103,
+                    "nodeType": "ParameterList",
+                    "parameters": [],
+                    "src": "3081:2:0"
+                  },
+                  "returnParameters": {
+                    "id": 106,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 105,
+                        "mutability": "mutable",
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 107,
+                        "src": "3107:7:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 104,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "3107:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "3106:9:0"
+                  },
+                  "scope": 108,
+                  "src": "3061:55:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 109,
+              "src": "148:2970:0"
+            }
+          ],
+          "src": "37:3082:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}

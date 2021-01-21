@@ -57,6 +57,11 @@
         },
         {
           "internalType": "bool",
+          "name": "enableBorrow",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
           "name": "enableBorrowOnReserve",
           "type": "bool"
         },

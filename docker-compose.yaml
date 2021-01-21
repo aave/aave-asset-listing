@@ -14,3 +14,4 @@ services:
     environment:
       MNEMONIC: ${MNEMONIC}
       INFURA_KEY: ${INFURA_KEY}
+      ALCHEMY_KEY: ${ALCHEMY_KEY}

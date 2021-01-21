@@ -5,7 +5,7 @@ import {IERC20} from './interfaces/IERC20.sol';
 import {ILendingPoolConfiguratorV2} from './interfaces/ILendingPoolConfiguratorV2.sol';
 import {IProposalGenericExecutor} from './interfaces/IProposalGenericExecutor.sol';
 import {IOverlyingAsset} from './interfaces/IOverlyingAsset.sol';
-
+import {ILendingPoolAddressesProvider} from './interfaces/ILendingPoolAddressesProvider.sol';
 /**
  * @title AssetListingProposalGenericExecutor
  * @notice Proposal payload to be executed by the Aave Governance contract via DELEGATECALL
@@ -14,9 +14,8 @@ import {IOverlyingAsset} from './interfaces/IOverlyingAsset.sol';
 contract AssetListingProposalGenericExecutor is IProposalGenericExecutor {
   event ProposalExecuted();
 
-  ILendingPoolConfiguratorV2 public constant LENDING_POOL_CONFIGURATOR_V2 =
-    ILendingPoolConfiguratorV2(0x311Bb771e4F8952E6Da169b425E7e92d6Ac45756);
-
+  ILendingPoolAddressesProvider public constant LENDING_POOL_ADDRESSES_PROVIDER = 
+    ILendingPoolAddressesProvider(0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5);
   /**
    * @dev Payload execution function, called once a proposal passed in the Aave governance
    */
@@ -31,9 +30,12 @@ contract AssetListingProposalGenericExecutor is IProposalGenericExecutor {
     uint256 liquidationBonus,
     uint256 reserveFactor,
     uint8 decimals,
-    bool enableBorrowOnReserve,
+    bool enableBorrow,
+    bool enableStableBorrow,
     bool enableAsCollateral
   ) external override {
+    ILendingPoolConfiguratorV2 LENDING_POOL_CONFIGURATOR_V2 =
+      ILendingPoolConfiguratorV2(LENDING_POOL_ADDRESSES_PROVIDER.getLendingPoolConfigurator());
     require(
       token == IOverlyingAsset(aToken).UNDERLYING_ASSET_ADDRESS(),
       'ATOKEN: WRONG_UNDERLYING_TOKEN'
@@ -53,7 +55,9 @@ contract AssetListingProposalGenericExecutor is IProposalGenericExecutor {
       decimals,
       interestStrategy
     );
-    LENDING_POOL_CONFIGURATOR_V2.enableBorrowingOnReserve(token, enableBorrowOnReserve);
+    if (enableBorrow) {
+      LENDING_POOL_CONFIGURATOR_V2.enableBorrowingOnReserve(token, enableStableBorrow);
+    }
     LENDING_POOL_CONFIGURATOR_V2.setReserveFactor(token, reserveFactor);
     if (enableAsCollateral) {
       LENDING_POOL_CONFIGURATOR_V2.configureReserveAsCollateral(

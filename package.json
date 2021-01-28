@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "SKIP_LOAD=true hardhat compile",
-    "test": "MAINNET_FORK=true FORKING_BLOCK=11538355 hardhat test",
+    "test:crv": "MAINNET_FORK=true FORKING_BLOCK=11538355 hardhat test ./test/test-listing-crv.spec.ts",
+    "test:bal": "MAINNET_FORK=true FORKING_BLOCK=11743368 hardhat test ./test/test-listing-bal.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main"

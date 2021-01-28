@@ -61,21 +61,22 @@ const MNEMONIC = process.env.MNEMONIC || '';
 const ALCHEMY_KEY = process.env.ALCHEMY_KEY || '';
 const MAINNET_FORK = process.env.MAINNET_FORK === 'true';
 
-const mainnetFork = MAINNET_FORK && process.env.FORKING_BLOCK
-  ? {
-    // eslint-disable-next-line radix
-    blockNumber: parseInt(process.env.FORKING_BLOCK),
-    url: ALCHEMY_KEY
-      ? `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`
-      : `https://main.infura.io/v3/${INFURA_KEY}`,
-  }
-  : undefined;
+const mainnetFork =
+  MAINNET_FORK && process.env.FORKING_BLOCK
+    ? {
+        // eslint-disable-next-line radix
+        blockNumber: parseInt(process.env.FORKING_BLOCK),
+        url: ALCHEMY_KEY
+          ? `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`
+          : `https://main.infura.io/v3/${INFURA_KEY}`,
+      }
+    : undefined;
 
 const getCommonNetworkConfig = (networkName: string, networkId: number) => ({
   url: ALCHEMY_KEY
     ? `https://eth-${
-      networkName === 'main' ? 'mainnet' : networkName
-    }.alchemyapi.io/v2/${ALCHEMY_KEY}`
+        networkName === 'main' ? 'mainnet' : networkName
+      }.alchemyapi.io/v2/${ALCHEMY_KEY}`
     : `https://${networkName}.infura.io/v3/${INFURA_KEY}`,
   hardfork: HARDFORK,
   blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,

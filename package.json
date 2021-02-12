@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "SKIP_LOAD=true hardhat compile",
+    "test": "MAINNET_FORK=true hardhat test ./test/test-listing-generic.spec.ts",
     "test:crv": "MAINNET_FORK=true FORKING_BLOCK=11538355 hardhat test ./test/test-listing-crv.spec.ts",
     "test:bal": "MAINNET_FORK=true FORKING_BLOCK=11743368 hardhat test ./test/test-listing-bal.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",

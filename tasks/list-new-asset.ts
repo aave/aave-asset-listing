@@ -2,6 +2,7 @@ import { task } from 'hardhat/config';
 import '@nomiclabs/hardhat-ethers';
 import { getContractAt } from '@nomiclabs/hardhat-ethers/dist/src/helpers';
 import { config } from 'dotenv';
+import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bs58 = require('bs58');
 
@@ -86,7 +87,11 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
         ENABLE_AS_COLLATERAL === 'true',
       ]
     );
-    const gov = await getContractAt(_DRE, 'IAaveGovernanceV2', AAVE_GOVERNANCE_V2 || '');
+    const gov = (await getContractAt(
+      _DRE,
+      'IAaveGovernanceV2',
+      AAVE_GOVERNANCE_V2 || ''
+    )) as IAaveGovernanceV2;
     const ipfsEncoded = `0x${bs58.decode(IPFS_HASH).slice(2).toString('hex')}`;
 
     await (

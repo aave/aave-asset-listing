@@ -18,7 +18,9 @@ Copy the `.default.env` file, rename it to `.env` and update it to match with yo
 Example for the Curve Token listing: 
 
 ```
+## You need either an infura or alchemy key with archive node setup
 INFURA_KEY= XXX
+ALCHEMY_KEY= XXX
 MNEMONIC= XXX
 TOKEN=0xd533a949740bb3306d119cc777fa900ba034cd52
 ATOKEN=0x84ddcafdece3b3e3a93372852b42455a644872a5
@@ -34,19 +36,27 @@ ENABLE_BORROW=false
 ENABLE_AS_COLLATERAL=true
 ENABLE_AS_RESERVE_COLLATERAL=false
 IPFS_HASH=QmNfU4FMdQriJVQeqQTNxgY63iSJVh8yCJf8aFDkQDjaLQ
+## For mainnet fork tests 
+## Address of EOA that has TOKEN on mainnet
+TOKEN_HOLDER=0x0e33be39b13c576ff48e14392fbf96b02f40cd34
+## Recent Block for mainnet fork test (need to be more recent than assets deployment blocks)
+FORKING_BLOCK=11538355
 ```
-
-## Run the deployment script
-
-### node: 
+# Node
+## Install
 
 `$ npm i`
+
+## Run the test
+
+`$ npm run test`
+## Run the deployment script
 
 `$ npm run propose-new-asset:kovan` for kovan
 
 `$ npm run propose-new-asset:main` for mainnet
 
-### docker-compose
+# docker-compose
 
 In one terminal tab: `docker-compose up`
 
@@ -54,10 +64,10 @@ Enter the container in new tab: `docker-compose exec contracts-env bash`
 
 In the container run: 
 
+`$ npm run test`
+
 `$ npm run propose-new-asset:kovan` for kovan
 
 `$ npm run propose-new-asset:main` for mainnet
 
-## Test
-`$ npm run test`
 

@@ -52,7 +52,7 @@ const accounts = [
 ];
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12500000;
-const DEFAULT_GAS_PRICE = 50000000000; // 50 gwei
+const DEFAULT_GAS_PRICE = Number(process.env.DEFAULT_GAS_PRICE) || 50000000000; // 50 gwei
 const HARDFORK = 'istanbul';
 const INFURA_KEY = process.env.INFURA_KEY || '';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';

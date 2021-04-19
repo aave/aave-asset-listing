@@ -22,6 +22,7 @@ import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
 import { IAaveOracle } from '../types/IAaveOracle';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { ILendingPool } from '../types/ILendingPool';
+import { ILendingPoolConfiguratorV2 } from '../types/ILendingPoolConfiguratorV2'
 import { IERC20 } from '../types/IERC20';
 import { Contract } from 'hardhat/internal/hardhat-network/stack-traces/model';
 
@@ -29,8 +30,9 @@ config({ path: path.resolve(process.cwd(), 'xsushi.env') });
 
 const bs58 = require('bs58');
 
+const TOKEN = '0xD5147bc8e386d91Cc5DBE72099DAC6C9b99276F5';
+
 const {
-  TOKEN,
   ATOKEN,
   STABLE_DEBT_TOKEN,
   VARIABLE_DEBT_TOKEN,
@@ -75,19 +77,22 @@ const AAVE_ORACLE_OWNER = '0xb9062896ec3a615a4e4444df183f0531a77218ae';
 const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const DAI_HOLDER = '0x72aabd13090af25dbb804f84de6280c697ed1150';
 
+const CONFIGURATOR = '0x311bb771e4f8952e6da169b425e7e92d6ac45756';
+
 const ERRORS = {
   NO_BORROW: '7',
   NO_COLLATERAL_BALANCE: '9',
   NO_STABLE_BORROW: '12',
 };
 
-describe('Deploy RENFIL assets with different params', () => {
+describe('Execute existing proposal on mainnet in hardhat fork: adding renFIL with borrow off', () => {
   let whale: JsonRpcSigner;
   let RENFILHolder: JsonRpcSigner;
   let daiHolder: JsonRpcSigner;
   let proposer: SignerWithAddress;
   let gov: IAaveGovernanceV2;
   let pool: ILendingPool;
+  let configurator: ILendingPoolConfiguratorV2;
   let aave: IERC20;
   let RENFIL: IERC20;
   let dai: IERC20;
@@ -129,6 +134,11 @@ describe('Deploy RENFIL assets with different params', () => {
       AAVE_LENDING_POOL,
       proposer
     )) as ILendingPool;
+    configurator = (await ethers.getContractAt(
+      'ILendingPoolConfiguratorV2',
+      CONFIGURATOR,
+      proposer
+    )) as ILendingPoolConfiguratorV2;
 
     // getting tokens used for tests
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
@@ -242,19 +252,15 @@ describe('Deploy RENFIL assets with different params', () => {
   });
   it('Should deploy and pass the renFIL enable borrow proposal', async () => {
 
-    
     enableProposal = (await gov.getProposalsCount());
-    await rawBRE.deployments.deploy('RenFilEnableProposal', { from: proposer.address });
-    const proposalAddress = (await rawBRE.deployments.get('RenFilEnableProposal')).address;
-    const executeInterface = new rawBRE.ethers.utils.Interface(['function execute()']);
-    const callData = executeInterface.encodeFunctionData('execute');
+    const callData = configurator.interface.encodeFunctionData('enableBorrowingOnReserve', [TOKEN, false])
     await gov.create(
       AAVE_SHORT_EXECUTOR,
-      [proposalAddress],
+      [configurator.address],
       ['0'],
       [''],
       [callData],
-      [true],
+      [false],
       '0x80f60ffbb61d01c48215d2c056a3567da34ee7576f7dbaae2378ae5b92afaded'
     );
     await (await gov.submitVote(enableProposal, true)).wait();

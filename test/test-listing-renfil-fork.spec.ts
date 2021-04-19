@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 
 import rawBRE, { ethers } from 'hardhat';
 
-import { BigNumber } from 'ethers';
+import { BigNumber, ContractFactory } from 'ethers';
 import { parseEther } from 'ethers/lib/utils';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 import { JsonRpcSigner } from '@ethersproject/providers';
@@ -23,8 +23,11 @@ import { IAaveOracle } from '../types/IAaveOracle';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { ILendingPool } from '../types/ILendingPool';
 import { IERC20 } from '../types/IERC20';
+import { Contract } from 'hardhat/internal/hardhat-network/stack-traces/model';
 
 config({ path: path.resolve(process.cwd(), 'xsushi.env') });
+
+const bs58 = require('bs58');
 
 const {
   TOKEN,
@@ -92,6 +95,7 @@ describe('Deploy RENFIL assets with different params', () => {
   let stableDebt: IERC20;
   let variableDebt: IERC20;
   let proposal: BigNumber;
+  let enableProposal: BigNumber;
   let snapshotId: string;
   before(async () => {
     [proposer] = await rawBRE.ethers.getSigners();
@@ -154,7 +158,7 @@ describe('Deploy RENFIL assets with different params', () => {
 
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
-    await (await gov.submitVote(proposal, true)).wait();
+    // await (await gov.submitVote(proposal, true)).wait();
     await advanceBlockTo((await latestBlock()) + VOTING_DURATION + 1);
     await (await gov.queue(proposal)).wait();
     let proposalState = await gov.getProposalState(proposal);
@@ -162,10 +166,8 @@ describe('Deploy RENFIL assets with different params', () => {
 
     await increaseTime(86400 + 10);
     snapshotId = await evmSnapshot();
-  });
-  afterEach(async () => {
-    evmRevert(snapshotId);
-    snapshotId = await evmSnapshot();
+
+
   });
   it('Should list correctly an asset: borrow off, collateral off, stable rate off', async () => {
     await (await gov.execute(proposal)).wait();
@@ -238,9 +240,36 @@ describe('Deploy RENFIL assets with different params', () => {
       pool.borrow(RENFIL.address, parseEther('5'), 1, 0, proposer.address)
     ).to.be.revertedWith(ERRORS.NO_BORROW);
   });
+  it('Should deploy and pass the renFIL enable borrow proposal', async () => {
+
+    
+    enableProposal = (await gov.getProposalsCount());
+    await rawBRE.deployments.deploy('RenFilEnableProposal', { from: proposer.address });
+    const proposalAddress = (await rawBRE.deployments.get('RenFilEnableProposal')).address;
+    const executeInterface = new rawBRE.ethers.utils.Interface(['function execute()']);
+    const callData = executeInterface.encodeFunctionData('execute');
+    await gov.create(
+      AAVE_SHORT_EXECUTOR,
+      [proposalAddress],
+      ['0'],
+      [''],
+      [callData],
+      [true],
+      '0x80f60ffbb61d01c48215d2c056a3567da34ee7576f7dbaae2378ae5b92afaded'
+    );
+    await (await gov.submitVote(enableProposal, true)).wait();
+    await advanceBlockTo((await latestBlock()) + VOTING_DURATION + 1);
+    await (await gov.queue(enableProposal)).wait();
+    let proposalState = await gov.getProposalState(enableProposal);
+    expect(proposalState).to.be.equal(5);
+
+    await increaseTime(86400 + 10);
+
+
+  })
   it('Should list correctly an asset: borrow on, collateral off, stable borrow off', async () => {
-    await (await gov.execute(proposal)).wait();
-    const proposalState = await gov.getProposalState(proposal);
+    await (await gov.execute(enableProposal)).wait();
+    const proposalState = await gov.getProposalState(enableProposal);
     expect(proposalState).to.be.equal(7);
     const {
       configuration: { data },
@@ -277,21 +306,24 @@ describe('Deploy RENFIL assets with different params', () => {
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
 
     // RENFIL deposit by RENFIL holder
+    const arenfilBalanceBefore = await aRENFIL.balanceOf(RENFIL_HOLDER);
+    const depositedAmount = parseEther('10')
     await (
-      await pool.connect(RENFILHolder).deposit(RENFIL.address, parseEther('10'), RENFIL_HOLDER, 0)
+      await pool.connect(RENFILHolder).deposit(RENFIL.address, depositedAmount, RENFIL_HOLDER, 0)
     ).wait();
-    expect(await aRENFIL.balanceOf(RENFIL_HOLDER)).to.be.equal(parseEther('10'));
+    expect(await aRENFIL.balanceOf(RENFIL_HOLDER)).to.be.equal(depositedAmount.add(arenfilBalanceBefore));
 
     // RENFIL holder not able to borrow DAI against RENFIL
     await expect(
       pool.connect(RENFILHolder).borrow(dai.address, parseEther('1'), 2, 0, RENFIL_HOLDER)
     ).to.be.revertedWith(ERRORS.NO_COLLATERAL_BALANCE);
-
     // proposer able to borrow RENFIL variable against AAVE
+    const borrowedAmount = parseEther('10')
+    const variableDebtBefore = await variableDebt.balanceOf(proposer.address);
     await (
-      await pool.connect(proposer).borrow(RENFIL.address, parseEther('10'), 2, 0, proposer.address)
+      await pool.connect(proposer).borrow(RENFIL.address, borrowedAmount, 2, 0, proposer.address)
     ).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('10'));
+    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowedAmount.add(variableDebtBefore));
 
     // proposer not able to borrow RENFIL stable against AAVE
     await expect(
@@ -303,160 +335,5 @@ describe('Deploy RENFIL assets with different params', () => {
     await (await RENFIL.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
     await (await pool.repay(RENFIL.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
-  });
-  it('Should list correctly an asset: borrow on, collateral on, stable rate off', async () => {
-    await (await gov.execute(proposal)).wait();
-    const proposalState = await gov.getProposalState(proposal);
-    expect(proposalState).to.be.equal(7);
-    const {
-      configuration: { data },
-      aTokenAddress,
-      stableDebtTokenAddress,
-      variableDebtTokenAddress,
-    } = await pool.getReserveData(TOKEN);
-    const poolData = parsePoolData(data);
-    expect(poolData).to.be.eql({
-      reserveFactor: RESERVE_FACTOR,
-      reserved: '0',
-      stableRateEnabled: '0',
-      borrowingEnabled: '1',
-      reserveFrozen: '0',
-      reserveActive: '1',
-      decimals: DECIMALS,
-      liquidityBonus: LIQUIDATION_BONUS,
-      LiquidityThreshold: LIQUIDATION_THRESHOLD,
-      LTV,
-    });
-    // preparing for tests.
-    aRENFIL = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
-    stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
-    variableDebt = (await ethers.getContractAt(
-      'IERC20',
-      variableDebtTokenAddress,
-      proposer
-    )) as IERC20;
-    const initCrvHolderBalance = await RENFIL.balanceOf(RENFIL_HOLDER);
-    await (await RENFIL.connect(RENFILHolder).approve(pool.address, parseEther('200000'))).wait();
-    await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
-
-    // AAVE deposit by proposer
-    await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-
-    // RENFIL deposit by RENFIL holder
-    await (
-      await pool.connect(RENFILHolder).deposit(RENFIL.address, parseEther('10'), RENFIL_HOLDER, 0)
-    ).wait();
-    expect(await aRENFIL.balanceOf(RENFIL_HOLDER)).to.be.equal(parseEther('10'));
-
-    // RENFIL holder able to borrow DAI against RENFIL
-    await (
-      await pool.connect(RENFILHolder).borrow(dai.address, parseEther('1'), 2, 0, RENFIL_HOLDER)
-    ).wait();
-
-    // proposer able to borrow RENFIL variable against AAVE
-    await (
-      await pool.connect(proposer).borrow(RENFIL.address, parseEther('10'), 2, 0, proposer.address)
-    ).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('10'));
-
-    // proposer not able to borrow RENFIL stable against AAVE
-    await expect(
-      pool.borrow(RENFIL.address, parseEther('5'), 1, 0, proposer.address)
-    ).to.be.revertedWith(ERRORS.NO_STABLE_BORROW);
-    increaseTime(40000);
-
-    // proposer able to repay RENFIL variable
-    await (await RENFIL.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
-    await (await pool.repay(RENFIL.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
-
-    // RENFIL holder able to repay DAI with  interests
-    await (await dai.connect(RENFILHolder).approve(pool.address, MAX_UINT_AMOUNT)).wait();
-    await (await pool.connect(RENFILHolder).repay(dai.address, MAX_UINT_AMOUNT, 2, RENFIL_HOLDER)).wait();
-
-    // RENFIL holder able to withdraw RENFIL with interest
-    await (await pool.connect(RENFILHolder).withdraw(RENFIL.address, MAX_UINT_AMOUNT, RENFIL_HOLDER)).wait();
-    expect(await RENFIL.balanceOf(RENFIL_HOLDER)).to.be.gt(initCrvHolderBalance);
-  });
-  it('Should list correctly an asset: borrow on, collateral on, stable rate on', async () => {
-    // setting the assets, executing the proposal
-    await (await gov.execute(proposal)).wait();
-    const proposalState = await gov.getProposalState(proposal);
-    expect(proposalState).to.be.equal(7);
-
-    // fetching and testing pool config data for RENFIL
-    const {
-      configuration: { data },
-      aTokenAddress,
-      stableDebtTokenAddress,
-      variableDebtTokenAddress,
-    } = await pool.getReserveData(TOKEN);
-    const poolData = parsePoolData(data);
-    expect(poolData).to.be.eql({
-      reserveFactor: RESERVE_FACTOR,
-      reserved: '0',
-      stableRateEnabled: '1',
-      borrowingEnabled: '1',
-      reserveFrozen: '0',
-      reserveActive: '1',
-      decimals: DECIMALS,
-      liquidityBonus: LIQUIDATION_BONUS,
-      LiquidityThreshold: LIQUIDATION_THRESHOLD,
-      LTV,
-    });
-
-    // preparing for tests.
-    aRENFIL = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
-    stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
-    variableDebt = (await ethers.getContractAt(
-      'IERC20',
-      variableDebtTokenAddress,
-      proposer
-    )) as IERC20;
-    const initCrvHolderBalance = await RENFIL.balanceOf(RENFIL_HOLDER);
-    await (await RENFIL.connect(RENFILHolder).approve(pool.address, parseEther('200000'))).wait();
-    await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
-
-    // AAVE deposit by proposer
-    await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-
-    // RENFIL deposit by RENFIL holder
-    await (
-      await pool.connect(RENFILHolder).deposit(RENFIL.address, parseEther('10'), RENFIL_HOLDER, 0)
-    ).wait();
-    expect(await aRENFIL.balanceOf(RENFIL_HOLDER)).to.be.equal(parseEther('10'));
-
-    // RENFIL holder able to borrow DAI against RENFIL
-    await (
-      await pool.connect(RENFILHolder).borrow(dai.address, parseEther('1'), 2, 0, RENFIL_HOLDER)
-    ).wait();
-
-    // proposer able to borrow RENFIL variable against AAVE
-    await (
-      await pool.connect(proposer).borrow(RENFIL.address, parseEther('10'), 2, 0, proposer.address)
-    ).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('10'));
-
-    // proposer able to borrow RENFIL stable against AAVE
-    await (await pool.borrow(RENFIL.address, parseEther('5'), 1, 0, proposer.address)).wait();
-    expect(await stableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('5'));
-    increaseTime(40000);
-
-    // proposer able to repay RENFIL variable
-    await (await RENFIL.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
-    await (await pool.repay(RENFIL.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
-
-    // proposer able to repay RENFIL sttable
-    await (await pool.repay(RENFIL.address, MAX_UINT_AMOUNT, 1, proposer.address)).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
-
-    // RENFIL holder able to repay DAI with  interests
-    await (await dai.connect(RENFILHolder).approve(pool.address, MAX_UINT_AMOUNT)).wait();
-    await (await pool.connect(RENFILHolder).repay(dai.address, MAX_UINT_AMOUNT, 2, RENFIL_HOLDER)).wait();
-
-    // RENFIL holder able to withdraw RENFIL with interest
-    await (await pool.connect(RENFILHolder).withdraw(RENFIL.address, MAX_UINT_AMOUNT, RENFIL_HOLDER)).wait();
-    expect(await RENFIL.balanceOf(RENFIL_HOLDER)).to.be.gt(initCrvHolderBalance);
   });
 });

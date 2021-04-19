@@ -10,6 +10,7 @@
     "test:bal": "MAINNET_FORK=true FORKING_BLOCK=11743368 hardhat test ./test/test-listing-bal.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:renfil": "MAINNET_FORK=true FORKING_BLOCK=12025205 hardhat test ./test/test-listing-renfil.spec.ts",
+    "test:renfil-fork": "MAINNET_FORK=true FORKING_BLOCK=12270002 hardhat test ./test/test-listing-renfil-fork.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main"

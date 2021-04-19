@@ -261,8 +261,18 @@ describe('Execute existing proposal on mainnet in hardhat fork: adding renFIL wi
       [''],
       [callData],
       [false],
-      '0x80f60ffbb61d01c48215d2c056a3567da34ee7576f7dbaae2378ae5b92afaded'
+      '0x1d3e8cea0d2274c89d6bfd0add77eebc441d07b25bcdb04b354e83dff43dd7da'
     );
+    console.log('ENABLING BORRWING RESERVE DATA: ', 
+      AAVE_SHORT_EXECUTOR,
+      [configurator.address],
+      ['0'],
+      [''],
+      [callData],
+      [false],
+      '0x1d3e8cea0d2274c89d6bfd0add77eebc441d07b25bcdb04b354e83dff43dd7da'
+    );
+
     await (await gov.submitVote(enableProposal, true)).wait();
     await advanceBlockTo((await latestBlock()) + VOTING_DURATION + 1);
     await (await gov.queue(enableProposal)).wait();

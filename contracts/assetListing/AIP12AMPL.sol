@@ -13,7 +13,7 @@ import {ILendingPool, DataTypes} from './interfaces/ILendingPool.sol';
  * @notice Proposal payload to be executed by the Aave Governance contract via DELEGATECALL
  * @author Aave
  **/
-contract AssetListingProposalGenericExecutor {
+contract AIP12AMPL {
   event ProposalExecuted();
 
   ILendingPoolAddressesProvider public constant LENDING_POOL_ADDRESSES_PROVIDER = 
@@ -28,7 +28,7 @@ contract AssetListingProposalGenericExecutor {
   uint256 public constant liquidationThreshold = 0;
   uint256 public constant liquidationBonus = 0;
   uint256 public constant reserveFactor = 2000;
-  uint8 decimals = 9;
+  uint8 public constant decimals = 9;
 
   /**
    * @dev Payload execution function, called once a proposal passed in the Aave governance

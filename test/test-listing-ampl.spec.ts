@@ -61,7 +61,6 @@ if (
 let k = 0;
 
 const log = ( ) => {
-  console.log(k++);
 
 }
 
@@ -152,8 +151,6 @@ describe('Deploy AMPL assets with different params', () => {
 
     // giving just a bit of Dai to Crv holder to pay for interest later
     await (await dai.transfer(AMPL_HOLDER, parseEther('10'))).wait();
-    console.log(((await ampl.balanceOf(AMPL_HOLDER)).toString()))
-    console.log(((await ampl.decimals()).toString()))
     await (
       await ampl.transfer(
         proposer.address,
@@ -220,7 +217,6 @@ describe('Deploy AMPL assets with different params', () => {
       proposer
     )) as IERC20;
     log()
-    console.log('1')
     await (await ampl.connect(amplHolder).approve(pool.address, parseEther('200000'))).wait();
     log()
     await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
@@ -230,16 +226,11 @@ describe('Deploy AMPL assets with different params', () => {
     log()
     // AMPL deposit by ampl holder
     const depositedAmount = parseEther('100').div(decimalMultiplier);
-    console.log(depositedAmount.toString())
-    console.log((await ampl.balanceOf(AMPL_HOLDER)).toString())
-    console.log((await ampl.allowance(AMPL_HOLDER, pool.address)).toString())
     await (
       await pool.connect(amplHolder).deposit(ampl.address, depositedAmount, AMPL_HOLDER, 0)
     ).wait();
-    console.log('eheh')
     expect(await aAmpl.balanceOf(AMPL_HOLDER)).to.be.equal(depositedAmount);
     log()
-    console.log('eheh')
 
     // AMPL holder not able to borrow DAI against AMPL
     await expect(
@@ -253,7 +244,6 @@ describe('Deploy AMPL assets with different params', () => {
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
     log()
-    console.log('eheh')
 
     // proposer not able to borrow AMPL stable against AAVE
     await expect(

@@ -58,12 +58,6 @@ if (
   throw new Error('You have not set correctly the .env file, make sure to read the README.md');
 }
 
-let k = 0;
-
-const log = ( ) => {
-
-}
-
 const AAVE_LENDING_POOL = '0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9';
 const VOTING_DURATION = 19200;
 
@@ -177,7 +171,6 @@ describe('Deploy AMPL assets with different params', () => {
 
     await (await gov.submitVote(proposal, true)).wait();
     await advanceBlockTo((await latestBlock()) + VOTING_DURATION + 1);
-    log();
     await (await gov.queue(proposal)).wait();
     let proposalState = await gov.getProposalState(proposal);
     expect(proposalState).to.be.equal(5);
@@ -216,21 +209,18 @@ describe('Deploy AMPL assets with different params', () => {
       variableDebtTokenAddress,
       proposer
     )) as IERC20;
-    log()
     await (await ampl.connect(amplHolder).approve(pool.address, parseEther('200000'))).wait();
-    log()
     await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-    log()
     // AMPL deposit by ampl holder
     const depositedAmount = parseEther('100').div(decimalMultiplier);
     await (
       await pool.connect(amplHolder).deposit(ampl.address, depositedAmount, AMPL_HOLDER, 0)
     ).wait();
-    expect(await aAmpl.balanceOf(AMPL_HOLDER)).to.be.equal(depositedAmount);
-    log()
+    expect(await aAmpl.balanceOf(AMPL_HOLDER)).to.gte(depositedAmount.sub(1));
+    expect(await aAmpl.balanceOf(AMPL_HOLDER)).to.lte(depositedAmount.add(1));
 
     // AMPL holder not able to borrow DAI against AMPL
     await expect(
@@ -243,7 +233,6 @@ describe('Deploy AMPL assets with different params', () => {
       await pool.connect(proposer).borrow(ampl.address, borrowAmount, 2, 0, proposer.address)
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
-    log()
 
     // proposer not able to borrow AMPL stable against AAVE
     await expect(

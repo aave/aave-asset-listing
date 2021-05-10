@@ -9,7 +9,7 @@
     "test:crv": "MAINNET_FORK=true FORKING_BLOCK=11538355 hardhat test ./test/test-listing-crv.spec.ts",
     "test:bal": "MAINNET_FORK=true FORKING_BLOCK=11743368 hardhat test ./test/test-listing-bal.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
-    "test:ampl": "MAINNET_FORK=true FORKING_BLOCK=12245642 hardhat test ./test/test-listing-ampl.spec.ts",
+    "test:ampl": "MAINNET_FORK=true FORKING_BLOCK=12406480 hardhat test ./test/test-listing-ampl.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main"

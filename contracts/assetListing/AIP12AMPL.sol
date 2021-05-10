@@ -20,7 +20,7 @@ contract AIP12AMPL {
     ILendingPoolAddressesProvider(0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5);
 
   address public constant token = 0xD46bA6D942050d489DBd938a2C909A5d5039A161;
-  address public constant aToken = 0x938Eb0b3C4Bb93aF924ACbf9d3dBD444153F7Ba8;
+  address public constant aToken = 0x6fBC3BE5ee5273598d1491D41bB45F6d05a7541A;
   address public constant stableDebtToken = 0x0e8f4fc4c261d454b13C74507Bce8C38AA990361;
   address public constant variableDebtToken = 0x3A38bbc6438d2CE2a9e8F116F315a23433755947;
   address public constant interestStrategy = 0x9A8CA7e1d64AFfF2664443B3803f280345F5336B;
@@ -62,7 +62,7 @@ contract AIP12AMPL {
 
     DataTypes.ReserveData memory reserve = pool.getReserveData(token);
 
-    IAAMPL(reserve.aTokenAddress).setDebtTokens(reserve.stableDebtTokenAddress, reserve.variableDebtTokenAddress);
+    IAAMPL(reserve.aTokenAddress).initializeDebtTokens();
 
     emit ProposalExecuted();
   }

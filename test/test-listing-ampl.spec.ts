@@ -236,7 +236,7 @@ describe('Deploy AMPL assets with different params', () => {
 
     // proposer not able to borrow AMPL stable against AAVE
     await expect(
-      pool.borrow(ampl.address, parseEther('5'), 1, 0, proposer.address)
+      pool.borrow(ampl.address, borrowAmount, 1, 0, proposer.address)
     ).to.be.revertedWith(ERRORS.NO_STABLE_BORROW);
     increaseTime(40000);
 

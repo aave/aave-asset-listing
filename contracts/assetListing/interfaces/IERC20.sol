@@ -65,6 +65,8 @@ interface IERC20 {
     uint256 amount
   ) external returns (bool);
 
+  function decimals() external view returns (uint8);
+
   /**
    * @dev Emitted when `value` tokens are moved from one account (`from`) to
    * another (`to`).

@@ -68,8 +68,7 @@ const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
 const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9';
 
 const RAI_HOLDER = '0x1C051112075FeAEe33BCDBe0984C2BB0DB53CF47';
-// const AAVE_ORACLE_OWNER = '0xb9062896ec3a615a4e4444df183f0531a77218ae';
-// const AAVE_ORACLE = '0xa50ba011c48153de246e5192c8f9258a2ba79ca9';
+const AAVE_ORACLE = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9';
 
 const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const DAI_HOLDER = '0x72aabd13090af25dbb804f84de6280c697ed1150';
@@ -136,6 +135,7 @@ describe('Deploy RAI assets with different params', () => {
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
     rai = (await ethers.getContractAt('IERC20', TOKEN, raiHolder)) as IERC20;
+    oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle
     decimalMultiplier = BigNumber.from('10').pow(await rai.decimals());
     
     // Give rai to whale
@@ -252,4 +252,9 @@ describe('Deploy RAI assets with different params', () => {
     await (await pool.repay(rai.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
   });
+
+  it("Oracle should return a non null RAI price", async () => {
+    console.log((await oracle.getAssetPrice(TOKEN)).toString())
+    expect(await oracle.getAssetPrice(TOKEN)).to.be.gt('0')
+  })
 });

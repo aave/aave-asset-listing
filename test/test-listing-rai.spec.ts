@@ -253,8 +253,7 @@ describe('Deploy RAI assets with different params', () => {
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
   });
 
-  it("Oracle should return a non null RAI price", async () => {
-    console.log((await oracle.getAssetPrice(TOKEN)).toString())
+  it("Oracle should return a non zero RAI price", async () => {
     expect(await oracle.getAssetPrice(TOKEN)).to.be.gt('0')
   })
 });

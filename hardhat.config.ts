@@ -11,6 +11,7 @@ import '@nomiclabs/hardhat-waffle';
 if (process.env.SKIP_LOAD !== 'true') {
   // eslint-disable-next-line global-require
   require('./tasks/list-new-asset.ts');
+  require('./tasks/list-rai.ts');
 }
 
 export const BUIDLEREVM_CHAIN_ID = 31337;

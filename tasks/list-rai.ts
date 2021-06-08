@@ -8,7 +8,7 @@ const bs58 = require('bs58');
 
 config();
 
-task('create:proposal-new-asset', 'Create some proposals and votes')
+task('create:proposal-new-asset:rai', 'Get the calldata to make a proposal to list RAI')
   // eslint-disable-next-line no-empty-pattern
   .setAction(async ({}, _DRE: any) => {
     const {
@@ -57,6 +57,7 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
     const genericPayloadAddress = (
       await _DRE.deployments.get('AssetListingProposalGenericExecutor')
     ).address;
+    console.log(genericPayloadAddress)
     const executeSignature =
       'execute(address,address,address,address,address,uint256,uint256,uint256,uint256,uint8,bool,bool,bool)';
     const executeCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
@@ -105,10 +106,9 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       AAVE_GOVERNANCE_V2 || ''
     )) as IAaveGovernanceV2;
     const ipfsEncoded = `0x${bs58.decode(IPFS_HASH).slice(2).toString('hex')}`;
-
-    await (
-      await gov
+      const tx = await gov
         .connect(proposer)
+        .populateTransaction
         .create(
           AAVE_SHORT_EXECUTOR,
           [genericPayloadAddress, AAVE_PRICE_ORACLE_V2],
@@ -118,6 +118,8 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
           [true, false],
           ipfsEncoded
         )
-    ).wait();
-    console.log('Your Proposal has been submitted');
+        
+    console.log("Your Proposal:", tx);
+
+    await (await proposer.sendTransaction(tx)).wait()
   });

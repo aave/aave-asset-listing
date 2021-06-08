@@ -169,9 +169,7 @@ describe('Deploy RAI assets with different params', () => {
 
     proposal = await gov.getProposalsCount();
     
-    await rawBRE.run('create:proposal-new-asset');
-
-    console.log("YES")
+    await rawBRE.run('create:proposal-new-asset:rai');
 
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
@@ -223,7 +221,7 @@ describe('Deploy RAI assets with different params', () => {
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-    // AMPL deposit by ampl holder
+    // RAI deposit by ampl holder
     const depositedAmount = parseEther('100').div(decimalMultiplier);
     await (
       await pool.connect(raiHolder).deposit(rai.address, depositedAmount, RAI_HOLDER, 0)
@@ -231,25 +229,25 @@ describe('Deploy RAI assets with different params', () => {
     expect(await aRai.balanceOf(RAI_HOLDER)).to.gte(depositedAmount.sub(1));
     expect(await aRai.balanceOf(RAI_HOLDER)).to.lte(depositedAmount.add(1));
 
-    // AMPL holder not able to borrow DAI against AMPL
+    // RAI holder not able to borrow DAI against RAI
     await expect(
       pool.connect(raiHolder).borrow(dai.address, parseEther('1'), 2, 0, RAI_HOLDER)
     ).to.be.revertedWith(ERRORS.NO_COLLATERAL_BALANCE);
 
-    // proposer able to borrow AMPL variable against AAVE
+    // proposer able to borrow RAI variable against AAVE
     const borrowAmount = parseEther('10').div(decimalMultiplier);
     await (
       await pool.connect(proposer).borrow(rai.address, borrowAmount, 2, 0, proposer.address)
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
 
-    // proposer not able to borrow AMPL stable against AAVE
+    // proposer not able to borrow RAI stable against AAVE
     await expect(
       pool.borrow(rai.address, borrowAmount, 1, 0, proposer.address)
     ).to.be.revertedWith(ERRORS.NO_STABLE_BORROW);
     increaseTime(40000);
 
-    // proposer able to repay AMPL variable
+    // proposer able to repay RAI variable
     await (await rai.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
     await (await pool.repay(rai.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));

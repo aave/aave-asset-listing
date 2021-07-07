@@ -8,11 +8,13 @@
     "test": "MAINNET_FORK=true hardhat test ./test/test-listing-generic.spec.ts",
     "test:crv": "MAINNET_FORK=true FORKING_BLOCK=11538355 hardhat test ./test/test-listing-crv.spec.ts",
     "test:bal": "MAINNET_FORK=true FORKING_BLOCK=11743368 hardhat test ./test/test-listing-bal.spec.ts",
+    "test:bond": "MAINNET_FORK=true FORKING_BLOCK=12767300 hardhat test ./test/test-listing-bond.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:rai": "MAINNET_FORK=true FORKING_BLOCK=12593370 hardhat test ./test/test-listing-rai.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
+    "propose-new-asset:bond:main": "hardhat create:proposal-new-asset:bond --network main",
     "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main"
   },
   "keywords": [],

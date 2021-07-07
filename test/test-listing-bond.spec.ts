@@ -1,0 +1,256 @@
+import path from 'path';
+import { expect } from 'chai';
+import { config } from 'dotenv';
+
+import rawBRE, { ethers } from 'hardhat';
+
+import { BigNumber } from 'ethers';
+import { parseEther } from 'ethers/lib/utils';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
+import { JsonRpcSigner } from '@ethersproject/providers';
+import {
+  evmSnapshot,
+  increaseTime,
+  evmRevert,
+  latestBlock,
+  advanceBlockTo,
+  impersonateAccountsHardhat,
+  MAX_UINT_AMOUNT,
+} from './utils/utils';
+import { parsePoolData } from './utils/listing';
+import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
+import { IAaveOracle } from '../types/IAaveOracle';
+import { ILendingPool } from '../types/ILendingPool';
+import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory';
+import { IERC20 } from '../types/IERC20';
+
+config({ path: path.resolve(process.cwd(), '.bond.env') });
+
+const AAVE_LENDING_POOL = '0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9'; // mainnet
+const VOTING_DURATION = 19200;
+
+const AAVE_HOLDER = '0x25f2226b597e8f9514b3f68f00f494cf4f286491'; // mainnet
+const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9'; // mainnet
+
+const BOND_HOLDER = '0x1aB4A30EA3C08d59eCbb4c737Cdd6668154277Ae'; // mainnet
+const AAVE_PRICE_ORACLE_V2 = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9'; // mainnet
+
+const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f'; // mainnet
+const DAI_HOLDER = '0x72aabd13090af25dbb804f84de6280c697ed1150'; // mainnet
+
+const {
+  TOKEN,
+  ATOKEN,
+  STABLE_DEBT_TOKEN,
+  VARIABLE_DEBT_TOKEN,
+  INTEREST_STRATEGY,
+  LTV,
+  LIQUIDATION_THRESHOLD,
+  LIQUIDATION_BONUS,
+  RESERVE_FACTOR,
+  DECIMALS,
+  IPFS_HASH,
+  AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
+  AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
+} = process.env;
+
+if (
+  !TOKEN ||
+  !ATOKEN ||
+  !STABLE_DEBT_TOKEN ||
+  !VARIABLE_DEBT_TOKEN ||
+  !INTEREST_STRATEGY ||
+  !LTV ||
+  !LIQUIDATION_BONUS ||
+  !LIQUIDATION_THRESHOLD ||
+  !DECIMALS ||
+  !IPFS_HASH ||
+  !AAVE_GOVERNANCE_V2 ||
+  !AAVE_SHORT_EXECUTOR ||
+  !RESERVE_FACTOR
+) {
+  throw new Error('You have not set correctly the .bond.env file, make sure to read the README.md');
+}
+
+describe('Deploy BOND assets with different params', () => {
+  let aaveHolder: JsonRpcSigner;
+  let bondHolder: JsonRpcSigner;
+  let daiHolder: JsonRpcSigner;
+  let proposer: SignerWithAddress;
+  let gov: IAaveGovernanceV2;
+  let pool: ILendingPool;
+  let oracle: IAaveOracle;
+  let AAVE: IERC20;
+  let BOND: IERC20;
+  let DAI: IERC20;
+  let aBOND: IERC20;
+  let stableDebt: IERC20;
+  let variableDebt: IERC20;
+  let proposal: BigNumber;
+  let snapshotId: string;
+
+  before(async () => {
+
+    [proposer] = await rawBRE.ethers.getSigners();
+    // send ether to the AAVE_WHALE, which is a non payable contract. Via selfdestruct
+    await rawBRE.deployments.deploy('SelfdestructTransfer', { from: proposer.address });
+    let selfDestructContract = await new SelfdestructTransferFactory(proposer).deploy();
+    await (
+      await selfDestructContract.destroyAndTransfer(AAVE_HOLDER, {
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
+    selfDestructContract = await new SelfdestructTransferFactory(proposer).deploy();
+    await (
+      await selfDestructContract.destroyAndTransfer(BOND_HOLDER, {
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
+    await impersonateAccountsHardhat([AAVE_HOLDER, BOND_HOLDER, DAI_HOLDER]);
+
+    // impersonating holders
+    aaveHolder = ethers.provider.getSigner(AAVE_HOLDER);
+    bondHolder = ethers.provider.getSigner(BOND_HOLDER);
+    daiHolder = ethers.provider.getSigner(DAI_HOLDER);
+
+    //getting main entry point contracts
+    gov = (await ethers.getContractAt(
+      'IAaveGovernanceV2',
+      AAVE_GOVERNANCE_V2,
+      proposer
+    )) as IAaveGovernanceV2;
+    pool = (await ethers.getContractAt(
+      'ILendingPool',
+      AAVE_LENDING_POOL,
+      proposer
+    )) as ILendingPool;
+
+    // getting tokens used for tests
+    AAVE = (await ethers.getContractAt('IERC20', AAVE_TOKEN, aaveHolder)) as IERC20;
+    DAI = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
+    BOND = (await ethers.getContractAt('IERC20', TOKEN, bondHolder)) as IERC20;
+    oracle = (await ethers.getContractAt('IAaveOracle', AAVE_PRICE_ORACLE_V2)) as IAaveOracle;
+
+    // Give BOND to whale
+    await (
+      await AAVE.transfer(
+        proposer.address,
+        (await AAVE.balanceOf(AAVE_HOLDER)).sub(parseEther('10'))
+      )
+    ).wait();
+
+    // giving just a bit of DAI to BOND holder to pay for interest later
+    await (await DAI.transfer(BOND_HOLDER, parseEther('10'))).wait();
+    await (
+      await BOND.transfer(
+        proposer.address,
+        (await BOND.balanceOf(BOND_HOLDER)).sub(parseEther('10000'))
+      )
+    ).wait();
+
+    // get next proposal id
+    proposal = await gov.getProposalsCount();
+
+    // create proposal
+    await rawBRE.run('create:proposal-new-asset:bond', {});
+
+    // voting, queuing proposals
+    await rawBRE.ethers.provider.send('evm_mine', [0]);
+    await (await gov.submitVote(proposal, true)).wait();
+    await advanceBlockTo((await latestBlock()) + VOTING_DURATION + 1);
+    await (await gov.queue(proposal)).wait();
+    const proposalState = await gov.getProposalState(proposal);
+    expect(proposalState).to.be.equal(5);
+    await increaseTime(86400 + 10);
+
+    snapshotId = await evmSnapshot();
+  });
+
+  it('Should list correctly an asset: borrow on, collateral on, stable borrow on', async () => {
+
+    // setting the assets, executing the proposal
+    await (await gov.execute(proposal)).wait();
+    const proposalState = await gov.getProposalState(proposal);
+    expect(proposalState).to.be.equal(7);
+
+    // fetching and testing pool config data for BOND
+    const {
+      configuration: { data },
+      aTokenAddress,
+      stableDebtTokenAddress,
+      variableDebtTokenAddress,
+    } = await pool.getReserveData(TOKEN);
+    const poolData = parsePoolData(data);
+
+    expect(poolData).to.be.eql({
+      reserveFactor: RESERVE_FACTOR,
+      reserved: '0',
+      stableRateEnabled: '1',
+      borrowingEnabled: '1',
+      reserveFrozen: '0',
+      reserveActive: '1',
+      decimals: DECIMALS,
+      liquidityBonus: LIQUIDATION_BONUS,
+      LiquidityThreshold: LIQUIDATION_THRESHOLD,
+      LTV,
+    });
+
+    // preparing for tests.
+    aBOND = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
+    stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
+    variableDebt = (await ethers.getContractAt(
+      'IERC20',
+      variableDebtTokenAddress,
+      proposer
+    )) as IERC20;
+    const initialBondHolderBalance = await BOND.balanceOf(BOND_HOLDER);
+    await (await BOND.connect(bondHolder).approve(pool.address, parseEther('200000'))).wait();
+    await (await AAVE.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
+
+    // AAVE deposit by proposer
+    await (await pool.deposit(AAVE.address, parseEther('100'), proposer.address, 0)).wait();
+
+    // BOND deposit by BOND holder
+    await (
+      await pool.connect(bondHolder).deposit(BOND.address, parseEther('1000'), BOND_HOLDER, 0)
+    ).wait();
+    expect(await aBOND.balanceOf(BOND_HOLDER)).to.be.equal(parseEther('1000'));
+
+    // BOND holder able to borrow DAI against BOND
+    await (
+      await pool.connect(bondHolder).borrow(DAI.address, parseEther('1'), 2, 0, BOND_HOLDER)
+    ).wait();
+
+    // proposer able to borrow BOND variable against AAVE
+    await (
+      await pool.connect(proposer).borrow(BOND.address, parseEther('10'), 2, 0, proposer.address)
+    ).wait();
+    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('10'));
+
+    // proposer able to borrow BOND stable against AAVE
+    await (await pool.borrow(BOND.address, parseEther('5'), 1, 0, proposer.address)).wait();
+    expect(await stableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('5'));
+    increaseTime(40000);
+
+    // proposer able to repay BOND variable
+    await (await BOND.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
+    await (await pool.repay(BOND.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
+    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
+
+    // proposer able to repay BOND stable
+    await (await pool.repay(BOND.address, MAX_UINT_AMOUNT, 1, proposer.address)).wait();
+    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
+
+    // BOND holder able to repay DAI with interests
+    await (await DAI.connect(bondHolder).approve(pool.address, MAX_UINT_AMOUNT)).wait();
+    await (await pool.connect(bondHolder).repay(DAI.address, MAX_UINT_AMOUNT, 2, BOND_HOLDER)).wait();
+
+    // BOND holder able to withdraw BOND with interest
+    await (await pool.connect(bondHolder).withdraw(BOND.address, MAX_UINT_AMOUNT, BOND_HOLDER)).wait();
+    expect(await BOND.balanceOf(BOND_HOLDER)).to.be.gt(initialBondHolderBalance);
+  });
+
+  it('Oracle should return a non zero BOND price', async () => {
+    expect(await oracle.getAssetPrice(TOKEN)).to.be.gt('0');
+  });
+});

@@ -1,16 +1,19 @@
-import { task } from 'hardhat/config';
-import '@nomiclabs/hardhat-ethers';
-import { getContractAt } from '@nomiclabs/hardhat-ethers/dist/src/helpers';
+import path from 'path';
 import { config } from 'dotenv';
+import '@nomiclabs/hardhat-ethers';
+import { task } from 'hardhat/config';
+import { getContractAt } from '@nomiclabs/hardhat-ethers/dist/src/helpers';
 import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
+import { HardhatRuntimeEnvironment, TaskArguments } from 'hardhat/types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bs58 = require('bs58');
 
-config();
+config({ path: path.resolve(process.cwd(), '.bond.env') });
 
 task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to list BOND')
+  .addFlag('testrun', 'if provided, only generates the transaction without submitting it onchain')
   // eslint-disable-next-line no-empty-pattern
-  .setAction(async ({}, _DRE: any) => {
+  .setAction(async (args: TaskArguments, _DRE: HardhatRuntimeEnvironment) => {
     const {
       TOKEN,
       ATOKEN,
@@ -30,6 +33,7 @@ task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to l
       AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
       AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
       AAVE_PRICE_ORACLE_V2 = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9', // mainnet
+      ASSET_LISTING_EXECUTOR = '0xe775A3A0A1cdc50bD48d5F47c442A0a4F5F24473', // mainnet AssetListingProposalGenericExecutor
     } = process.env;
     if (
       !TOKEN ||
@@ -49,18 +53,16 @@ task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to l
       !AAVE_GOVERNANCE_V2 ||
       !AAVE_SHORT_EXECUTOR ||
       !AAVE_PRICE_ORACLE_V2 ||
-      !RESERVE_FACTOR
+      !RESERVE_FACTOR ||
+      !ASSET_LISTING_EXECUTOR
     ) {
       throw new Error('You have not set correctly the .env file, make sure to read the README.md');
     }
     const proposer = (await _DRE.ethers.getSigners())[0];
-    const genericPayloadAddress = (
-      await _DRE.deployments.get('AssetListingProposalGenericExecutor')
-    ).address;
-    console.log(genericPayloadAddress);
-    const executeSignature =
+
+    const executeListingSign =
       'execute(address,address,address,address,address,uint256,uint256,uint256,uint256,uint8,bool,bool,bool)';
-    const executeCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
+    const executeListingData = _DRE.ethers.utils.defaultAbiCoder.encode(
       [
         'address',
         'address',
@@ -94,8 +96,8 @@ task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to l
     );
 
     // Set the Chainlink oracle address
-    const setAssetSignature = 'setAssetSources(address[],address[])';
-    const setAssetCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
+    const setAssetSign = 'setAssetSources(address[],address[])';
+    const setAssetData = _DRE.ethers.utils.defaultAbiCoder.encode(
       ['address[]', 'address[]'],
       [[TOKEN], [CHAINLINK_ORACLE_PROXY]]
     );
@@ -110,15 +112,18 @@ task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to l
       .connect(proposer)
       .populateTransaction.create(
         AAVE_SHORT_EXECUTOR,
-        [genericPayloadAddress, AAVE_PRICE_ORACLE_V2],
+        [ASSET_LISTING_EXECUTOR, AAVE_PRICE_ORACLE_V2],
         ['0', '0'],
-        [executeSignature, setAssetSignature],
-        [executeCallData, setAssetCallData],
+        [executeListingSign, setAssetSign],
+        [executeListingData, setAssetData],
         [true, false],
         ipfsEncoded
       );
 
-    console.log('Your Proposal:', tx);
-    return;
-    await (await proposer.sendTransaction(tx)).wait();
+    console.log('Proposal transaction:', tx);
+
+    if (!args.testrun) {
+      const receipt = await (await proposer.sendTransaction(tx)).wait();
+      console.log('Proposal submitted in:', receipt.transactionHash);
+    }
   });

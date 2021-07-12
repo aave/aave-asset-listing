@@ -8,6 +8,8 @@ const bs58 = require('bs58');
 
 config();
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 task('create:proposal-new-asset', 'Create some proposals and votes')
   // eslint-disable-next-line no-empty-pattern
   .setAction(async ({}, _DRE: any) => {
@@ -26,6 +28,8 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       ENABLE_AS_COLLATERAL,
       ENABLE_STABLE_BORROW,
       IPFS_HASH,
+      SET_ASSET_PRICE_SOURCE,
+      TOKEN_ORACLE_SOURCE,
       AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
       AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
     } = process.env;
@@ -42,6 +46,7 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       (ENABLE_BORROW !== 'true' && ENABLE_BORROW !== 'false') ||
       (ENABLE_AS_COLLATERAL !== 'true' && ENABLE_AS_COLLATERAL !== 'false') ||
       (ENABLE_STABLE_BORROW !== 'true' && ENABLE_STABLE_BORROW !== 'false') ||
+      (SET_ASSET_PRICE_SOURCE === 'true' && !TOKEN_ORACLE_SOURCE) ||
       !IPFS_HASH ||
       !AAVE_GOVERNANCE_V2 ||
       !AAVE_SHORT_EXECUTOR ||
@@ -53,59 +58,45 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
     const genericPayloadAddress = (
       await _DRE.deployments.get('AssetListingProposalGenericExecutor')
     ).address;
+
     const executeSignature =
-      'execute(address,address,address,address,address,uint256,uint256,uint256,uint256,uint8,bool,bool,bool)';
-    const callData = _DRE.ethers.utils.defaultAbiCoder.encode(
+      'execute(address[5],uint256,uint256,uint256,uint256,uint8,bool[3],address)';
+    const executeCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
+      ['address[5]', 'uint256', 'uint256', 'uint256', 'uint256', 'uint8', 'bool[3]', 'address'],
       [
-        'address',
-        'address',
-        'address',
-        'address',
-        'address',
-        'uint',
-        'uint',
-        'uint',
-        'uint',
-        'uint8',
-        'bool',
-        'bool',
-        'bool',
-      ],
-      [
-        TOKEN,
-        ATOKEN,
-        STABLE_DEBT_TOKEN,
-        VARIABLE_DEBT_TOKEN,
-        INTEREST_STRATEGY,
+        [TOKEN, ATOKEN, STABLE_DEBT_TOKEN, VARIABLE_DEBT_TOKEN, INTEREST_STRATEGY],
         LTV,
         LIQUIDATION_THRESHOLD,
         LIQUIDATION_BONUS,
         RESERVE_FACTOR,
         DECIMALS,
-        ENABLE_BORROW === 'true',
-        ENABLE_STABLE_BORROW === 'true',
-        ENABLE_AS_COLLATERAL === 'true',
+        [
+          ENABLE_BORROW === 'true',
+          ENABLE_STABLE_BORROW === 'true',
+          ENABLE_AS_COLLATERAL === 'true',
+        ],
+        SET_ASSET_PRICE_SOURCE === 'true' ? TOKEN_ORACLE_SOURCE : ZERO_ADDRESS
       ]
     );
+
     const gov = (await getContractAt(
       _DRE,
       'IAaveGovernanceV2',
       AAVE_GOVERNANCE_V2 || ''
     )) as IAaveGovernanceV2;
     const ipfsEncoded = `0x${bs58.decode(IPFS_HASH).slice(2).toString('hex')}`;
+    const tx = await gov
+      .connect(proposer)
+      .populateTransaction.create(
+        AAVE_SHORT_EXECUTOR,
+        [genericPayloadAddress],
+        ['0'],
+        [executeSignature],
+        [executeCallData],
+        [true],
+        ipfsEncoded
+      );
 
-    await (
-      await gov
-        .connect(proposer)
-        .create(
-          AAVE_SHORT_EXECUTOR,
-          [genericPayloadAddress],
-          ['0'],
-          [executeSignature],
-          [callData],
-          [true],
-          ipfsEncoded
-        )
-    ).wait();
+    await (await proposer.sendTransaction(tx)).wait();
     console.log('Your Proposal has been submitted');
   });

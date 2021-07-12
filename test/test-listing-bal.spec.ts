@@ -22,10 +22,8 @@ import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
 import { IAaveOracle } from '../types/IAaveOracle';
 import { ILendingPool } from '../types/ILendingPool';
 import { IERC20 } from '../types/IERC20';
-console.log('PATJH', path.resolve(process.cwd()));
 
-config({ path: path.resolve(process.cwd(), '.crv.env') });
-console.log(process.env);
+config({ path: path.resolve(process.cwd(), '.bal.env') });
 
 const {
   TOKEN,

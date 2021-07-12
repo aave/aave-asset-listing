@@ -23,7 +23,7 @@ import { IAaveOracle } from '../types/IAaveOracle';
 import { ILendingPool } from '../types/ILendingPool';
 import { IERC20 } from '../types/IERC20';
 
-config({ path: path.resolve(process.cwd(), 'xsushi.env') });
+config({ path: path.resolve(process.cwd(), '.xsushi.env') });
 
 const {
   TOKEN,

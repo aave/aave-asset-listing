@@ -169,7 +169,7 @@ describe('Deploy RAI assets with different params', () => {
 
     proposal = await gov.getProposalsCount();
     
-    await rawBRE.run('create:proposal-new-asset:rai');
+    await rawBRE.run('create:proposal-new-asset');
 
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);

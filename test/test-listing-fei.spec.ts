@@ -20,6 +20,7 @@ import {
 } from './utils/utils';
 import { parsePoolData } from './utils/listing';
 import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
+import { IAaveIncentivesController } from '../types/IAaveIncentivesController';
 import { IAaveOracle } from '../types/IAaveOracle';
 import { ILendingPool } from '../types/ILendingPool';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
@@ -73,6 +74,11 @@ const AAVE_ORACLE = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9';
 const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
 const DAI_HOLDER = '0x72aabd13090af25dbb804f84de6280c697ed1150';
 
+const INCENTIVES_CONTROLLER = '0xDee5c1662bBfF8f80f7c572D8091BF251b3B0dAB';
+const FEI_DAO = '0x639572471f2f318464dc01066a56867130e45E25';
+const TRIBE_TOKEN = '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B';
+const TRIBE_TREASURY = '0x8d5ED43dCa8C2F7dFB20CF7b53CC7E593635d7b9';
+
 const ERRORS = {
   NO_BORROW: '7',
   NO_COLLATERAL_BALANCE: '9',
@@ -82,14 +88,18 @@ const ERRORS = {
 describe('Deploy FEI assets with different params', () => {
   let whale: JsonRpcSigner;
   let feiHolder: JsonRpcSigner;
+  let tribeHolder: JsonRpcSigner;
+  let feiDao: JsonRpcSigner;
   let daiHolder: JsonRpcSigner;
   let proposer: SignerWithAddress;
   let gov: IAaveGovernanceV2;
+  let incentivesController: IAaveIncentivesController;
   let pool: ILendingPool;
   let oracle: IAaveOracle;
   let aave: IERC20;
   let fei: IERC20;
   let dai: IERC20;
+  let tribe: IERC20;
   let aFei: IERC20;
   let stableDebt: IERC20;
   let variableDebt: IERC20;
@@ -112,13 +122,30 @@ describe('Deploy FEI assets with different params', () => {
         value: ethers.utils.parseEther('1'),
       })
     ).wait();
-    await impersonateAccountsHardhat([AAVE_WHALE, FEI_HOLDER, DAI_HOLDER]);
+
+    selfDestructContract = await new SelfdestructTransferFactory(proposer).deploy();
+    await (
+      await selfDestructContract.destroyAndTransfer(FEI_DAO, {
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
+
+    selfDestructContract = await new SelfdestructTransferFactory(proposer).deploy();
+    await (
+      await selfDestructContract.destroyAndTransfer(TRIBE_TREASURY, {
+        value: ethers.utils.parseEther('1'),
+      })
+    ).wait();
+    await impersonateAccountsHardhat([AAVE_WHALE, FEI_HOLDER, DAI_HOLDER, FEI_DAO, TRIBE_TREASURY]);
 
     // impersonating holders
 
     whale = ethers.provider.getSigner(AAVE_WHALE);
     feiHolder = ethers.provider.getSigner(FEI_HOLDER);
     daiHolder = ethers.provider.getSigner(DAI_HOLDER);
+    tribeHolder = ethers.provider.getSigner(TRIBE_TREASURY);
+    feiDao = ethers.provider.getSigner(FEI_DAO);
+
     //getting main entry point contracts
     gov = (await ethers.getContractAt(
       'IAaveGovernanceV2',
@@ -131,10 +158,17 @@ describe('Deploy FEI assets with different params', () => {
       proposer
     )) as ILendingPool;
 
+    incentivesController = (await ethers.getContractAt(
+      'IAaveIncentivesController',
+      INCENTIVES_CONTROLLER,
+      feiDao
+    )) as IAaveIncentivesController;
+
     // getting tokens used for tests
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
     fei = (await ethers.getContractAt('IERC20', TOKEN, feiHolder)) as IERC20;
+    tribe = (await ethers.getContractAt('IERC20', TRIBE_TOKEN, feiHolder)) as IERC20;
     oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle
     decimalMultiplier = BigNumber.from('10').pow(BigNumber.from('18'));
     
@@ -251,6 +285,44 @@ describe('Deploy FEI assets with different params', () => {
     await (await fei.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
     await (await pool.repay(fei.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
+  });
+
+  it("Incentives active on borrowing", async () => {
+    const { variableDebtTokenAddress } = await pool.getReserveData(TOKEN);
+
+    // The admin + emissions manager can't be the same address due to proxy restrictions 
+    // so we change it
+    await (await incentivesController.connect(feiDao).changeAdmin(FEI_HOLDER)).wait();
+    
+    await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
+
+    await (
+      await incentivesController
+        .connect(feiDao)
+        .configureAssets([variableDebtTokenAddress], [parseEther('.00001')])
+    ).wait();
+
+     // set distribution to end in distant future
+    await (await incentivesController.connect(feiDao).setDistributionEnd(parseEther('1'))).wait();
+
+    // Transfer TRIBE to incentivesController
+    await (
+      await tribe.connect(tribeHolder).transfer(incentivesController.address, parseEther('1000000'))
+    ).wait();
+
+    // proposer borrows FEI variable against AAVE
+    const borrowAmount = parseEther('10').div(decimalMultiplier);
+    await (
+      await pool.connect(proposer).borrow(fei.address, borrowAmount, 2, 0, proposer.address)
+    ).wait();
+
+    await (
+      await incentivesController
+        .connect(proposer)
+        .claimRewards([variableDebtTokenAddress], parseEther('.00001'), proposer.address)
+    ).wait();
+
+    expect(await tribe.balanceOf(proposer.address)).to.be.equal(parseEther('.00001'));
   });
 
   it("Oracle should return a non zero FEI price", async () => {

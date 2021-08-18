@@ -292,8 +292,13 @@ describe('Deploy FEI assets with different params', () => {
 
     // The admin + emissions manager can't be the same address due to proxy restrictions 
     // so we change it
-    await (await incentivesController.connect(feiDao).changeAdmin(FEI_HOLDER)).wait();
-    
+    const adminProxyAbi = ['function changeAdmin(address newOwner)'];
+    const adminProxyInterface = new ethers.utils.Interface(adminProxyAbi);
+    const encodedChangeAdmin = adminProxyInterface.encodeFunctionData('changeAdmin', [FEI_HOLDER]);
+    await (
+      await feiDao.sendTransaction({ data: encodedChangeAdmin, to: incentivesController.address })
+    ).wait();
+
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
 
     await (

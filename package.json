@@ -11,7 +11,7 @@
     "test:bond": "MAINNET_FORK=true FORKING_BLOCK=12767300 hardhat test ./test/test-listing-bond.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:rai": "MAINNET_FORK=true FORKING_BLOCK=12593370 hardhat test ./test/test-listing-rai.spec.ts",
-    "test:fei": "MAINNET_FORK=true FORKING_BLOCK=12914870 hardhat test ./test/test-listing-fei.spec.ts",
+    "test:fei": "MAINNET_FORK=true FORKING_BLOCK=13045160 hardhat test ./test/test-listing-fei.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
@@ -24,7 +24,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/mocha": "^8.2.0",
-    "hardhat": "^2.0.7",
+    "hardhat": "^2.6.0",
     "install": "^0.13.0"
   },
   "devDependencies": {

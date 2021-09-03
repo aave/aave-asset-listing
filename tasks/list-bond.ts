@@ -1,4 +1,3 @@
-import path from 'path';
 import { config } from 'dotenv';
 import '@nomiclabs/hardhat-ethers';
 import { task } from 'hardhat/config';
@@ -8,7 +7,7 @@ import { HardhatRuntimeEnvironment, TaskArguments } from 'hardhat/types';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bs58 = require('bs58');
 
-config({ path: path.resolve(process.cwd(), '.bond.env') });
+config();
 
 task('create:proposal-new-asset:bond', 'Get the calldata to make a proposal to list BOND')
   .addFlag('testrun', 'if provided, only generates the transaction without submitting it onchain')

@@ -12,6 +12,7 @@ if (process.env.SKIP_LOAD !== 'true') {
   // eslint-disable-next-line global-require
   require('./tasks/list-new-asset.ts');
   require('./tasks/list-rai.ts');
+  require('./tasks/list-frax.ts');
   require('./tasks/list-bond.ts');
 }
 

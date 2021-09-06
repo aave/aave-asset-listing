@@ -25,7 +25,7 @@ import { ILendingPool } from '../types/ILendingPool';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { IERC20 } from '../types/IERC20';
 
-config({ path: path.resolve(process.cwd(), '.rai.env') });
+config({ path: path.resolve(process.cwd(), '.frax.env') });
 
 const {
   TOKEN,
@@ -67,7 +67,7 @@ const VOTING_DURATION = 19200;
 const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
 const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9';
 
-const RAI_HOLDER = '0x1C051112075FeAEe33BCDBe0984C2BB0DB53CF47';
+const FRAX_HOLDER = '0xD84c2FDF2F8733A5BbEA65EEC0bB211947792871';
 const AAVE_ORACLE = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9';
 
 const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
@@ -79,18 +79,18 @@ const ERRORS = {
   NO_STABLE_BORROW: '12',
 };
 
-describe('Deploy RAI assets with different params', () => {
+describe('Deploy FRAX assets with different params', () => {
   let whale: JsonRpcSigner;
-  let raiHolder: JsonRpcSigner;
+  let fraxHolder: JsonRpcSigner;
   let daiHolder: JsonRpcSigner;
   let proposer: SignerWithAddress;
   let gov: IAaveGovernanceV2;
   let pool: ILendingPool;
   let oracle: IAaveOracle;
   let aave: IERC20;
-  let rai: IERC20;
+  let frax: IERC20;
   let dai: IERC20;
-  let aRai: IERC20;
+  let aFrax: IERC20;
   let stableDebt: IERC20;
   let variableDebt: IERC20;
   let proposal: BigNumber;
@@ -108,16 +108,16 @@ describe('Deploy RAI assets with different params', () => {
     ).wait();
     selfDestructContract = await new SelfdestructTransferFactory(proposer).deploy();
     await (
-      await selfDestructContract.destroyAndTransfer(RAI_HOLDER, {
+      await selfDestructContract.destroyAndTransfer(FRAX_HOLDER, {
         value: ethers.utils.parseEther('1'),
       })
     ).wait();
-    await impersonateAccountsHardhat([AAVE_WHALE, RAI_HOLDER, DAI_HOLDER]);
+    await impersonateAccountsHardhat([AAVE_WHALE, FRAX_HOLDER, DAI_HOLDER]);
 
     // impersonating holders
 
     whale = ethers.provider.getSigner(AAVE_WHALE);
-    raiHolder = ethers.provider.getSigner(RAI_HOLDER);
+    fraxHolder = ethers.provider.getSigner(FRAX_HOLDER);
     daiHolder = ethers.provider.getSigner(DAI_HOLDER);
     //getting main entry point contracts
     gov = (await ethers.getContractAt(
@@ -134,11 +134,11 @@ describe('Deploy RAI assets with different params', () => {
     // getting tokens used for tests
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
-    rai = (await ethers.getContractAt('IERC20', TOKEN, raiHolder)) as IERC20;
+    frax = (await ethers.getContractAt('IERC20', TOKEN, fraxHolder)) as IERC20;
     oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle
-    decimalMultiplier = BigNumber.from('10').pow(await rai.decimals());
+    decimalMultiplier = BigNumber.from('10').pow(await frax.decimals());
     
-    // Give rai to whale
+    // Give frax to whale
     await (
       await aave.transfer(
         proposer.address,
@@ -146,12 +146,12 @@ describe('Deploy RAI assets with different params', () => {
       )
     ).wait();
 
-    // giving just a bit of Dai to RAI holder to pay for interest later
-    await (await dai.transfer(RAI_HOLDER, parseEther('10'))).wait();
+    // giving just a bit of Dai to FRAX holder to pay for interest later
+    await (await dai.transfer(FRAX_HOLDER, parseEther('10'))).wait();
     await (
-      await rai.transfer(
+      await frax.transfer(
         proposer.address,
-        (await rai.balanceOf(RAI_HOLDER)).sub((parseEther('1000').div(decimalMultiplier)))
+        (await frax.balanceOf(FRAX_HOLDER)).sub((parseEther('1000').div(decimalMultiplier)))
       )
     ).wait();
 
@@ -169,7 +169,7 @@ describe('Deploy RAI assets with different params', () => {
 
     proposal = await gov.getProposalsCount();
     
-    await rawBRE.run('create:proposal-new-asset:rai');
+    await rawBRE.run('create:proposal-new-asset:frax');
 
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
@@ -209,51 +209,51 @@ describe('Deploy RAI assets with different params', () => {
     });
 
     // preparing for tests.
-    aRai = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
+    aFrax = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
     stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
     variableDebt = (await ethers.getContractAt(
       'IERC20',
       variableDebtTokenAddress,
       proposer
     )) as IERC20;
-    await (await rai.connect(raiHolder).approve(pool.address, parseEther('200000'))).wait();
+    await (await frax.connect(fraxHolder).approve(pool.address, parseEther('200000'))).wait();
     await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-    // RAI deposit by ampl holder
+    // FRAX deposit by ampl holder
     const depositedAmount = parseEther('100').div(decimalMultiplier);
     await (
-      await pool.connect(raiHolder).deposit(rai.address, depositedAmount, RAI_HOLDER, 0)
+      await pool.connect(fraxHolder).deposit(frax.address, depositedAmount, FRAX_HOLDER, 0)
     ).wait();
-    expect(await aRai.balanceOf(RAI_HOLDER)).to.gte(depositedAmount.sub(1));
-    expect(await aRai.balanceOf(RAI_HOLDER)).to.lte(depositedAmount.add(1));
+    expect(await aFrax.balanceOf(FRAX_HOLDER)).to.gte(depositedAmount.sub(1));
+    expect(await aFrax.balanceOf(FRAX_HOLDER)).to.lte(depositedAmount.add(1));
 
-    // RAI holder not able to borrow DAI against RAI
+    // FRAX holder not able to borrow DAI against FRAX
     await expect(
-      pool.connect(raiHolder).borrow(dai.address, parseEther('1'), 2, 0, RAI_HOLDER)
+      pool.connect(fraxHolder).borrow(dai.address, parseEther('1'), 2, 0, FRAX_HOLDER)
     ).to.be.revertedWith(ERRORS.NO_COLLATERAL_BALANCE);
 
-    // proposer able to borrow RAI variable against AAVE
+    // proposer able to borrow FRAX variable against AAVE
     const borrowAmount = parseEther('10').div(decimalMultiplier);
     await (
-      await pool.connect(proposer).borrow(rai.address, borrowAmount, 2, 0, proposer.address)
+      await pool.connect(proposer).borrow(frax.address, borrowAmount, 2, 0, proposer.address)
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
 
-    // proposer not able to borrow RAI stable against AAVE
+    // proposer not able to borrow FRAX stable against AAVE
     await expect(
-      pool.borrow(rai.address, borrowAmount, 1, 0, proposer.address)
+      pool.borrow(frax.address, borrowAmount, 1, 0, proposer.address)
     ).to.be.revertedWith(ERRORS.NO_STABLE_BORROW);
     increaseTime(40000);
 
-    // proposer able to repay RAI variable
-    await (await rai.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
-    await (await pool.repay(rai.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
+    // proposer able to repay FRAX variable
+    await (await frax.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
+    await (await pool.repay(frax.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
   });
 
-  it("Oracle should return a non zero RAI price", async () => {
+  it("Oracle should return a non zero FRAX price", async () => {
     expect(await oracle.getAssetPrice(TOKEN)).to.be.gt('0')
   })
 });

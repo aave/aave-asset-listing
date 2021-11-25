@@ -237,11 +237,11 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
     const borrowAmount = parseEther('10').div(decimalMultiplier);
     await expect(
       pool.connect(proposer).borrow(guni.address, borrowAmount, 2, 0, proposer.address)
-    ).to.revert;
+    ).to.be.reverted;
 
     await expect(
       pool.borrow(guni.address, borrowAmount, 1, 0, proposer.address)
-    ).to.revert;
+    ).to.be.reverted;
     increaseTime(40000);
   });
 

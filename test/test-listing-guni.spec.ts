@@ -24,44 +24,11 @@ import { ILendingPool } from '../types/ILendingPool';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { IERC20 } from '../types/IERC20';
 
-config({ path: path.resolve(process.cwd(), '.gunidaiusdc.env') });
-
-const {
-  TOKEN,
-  ATOKEN,
-  STABLE_DEBT_TOKEN,
-  VARIABLE_DEBT_TOKEN,
-  INTEREST_STRATEGY,
-  LTV,
-  LIQUIDATION_THRESHOLD,
-  LIQUIDATION_BONUS,
-  RESERVE_FACTOR,
-  DECIMALS,
-  IPFS_HASH,
-  AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
-  AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
-} = process.env;
-
-if (
-  !TOKEN ||
-  !ATOKEN ||
-  !STABLE_DEBT_TOKEN ||
-  !VARIABLE_DEBT_TOKEN ||
-  !INTEREST_STRATEGY ||
-  !LTV ||
-  !LIQUIDATION_BONUS ||
-  !LIQUIDATION_THRESHOLD ||
-  !DECIMALS ||
-  !IPFS_HASH ||
-  !AAVE_GOVERNANCE_V2 ||
-  !AAVE_SHORT_EXECUTOR ||
-  !RESERVE_FACTOR
-) {
-  throw new Error('You have not set correctly the .env file, make sure to read the README.md');
-}
-
+const AAVE_GOVERNANCE_V2 = "0xEC568fffba86c094cf06b22134B23074DFE2252c"
 const AAVE_LENDING_POOL = "0x7937D4799803FbBe595ed57278Bc4cA21f3bFfCB" //'0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9';
 const VOTING_DURATION = 19200;
+
+const GUNI1 = "0x50379f632ca68D36E50cfBC8F78fe16bd1499d1e"
 
 const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
 const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9';
@@ -78,7 +45,7 @@ const ERRORS = {
   NO_STABLE_BORROW: '12',
 };
 
-describe('Deploy G-UNI DAI/USDC assets with different params', () => {
+describe('Deploy G-UNI assets with different params', () => {
   let whale: JsonRpcSigner;
   let guniHolder: JsonRpcSigner;
   let daiHolder: JsonRpcSigner;
@@ -118,6 +85,7 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
     whale = ethers.provider.getSigner(AAVE_WHALE);
     guniHolder = ethers.provider.getSigner(GUNI_HOLDER);
     daiHolder = ethers.provider.getSigner(DAI_HOLDER);
+
     //getting main entry point contracts
     gov = (await ethers.getContractAt(
       'IAaveGovernanceV2',
@@ -133,9 +101,9 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
     // getting tokens used for tests
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
-    guni = (await ethers.getContractAt('IERC20', TOKEN, guniHolder)) as IERC20;
+    guni = (await ethers.getContractAt('IERC20', GUNI1, guniHolder)) as IERC20;
     oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle
-    decimalMultiplier = BigNumber.from('10').pow(await guni.decimals());
+    decimalMultiplier = BigNumber.from('10').pow(BigNumber.from("18"));
 
     // Give guni to whale
     await (
@@ -145,7 +113,7 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
       )
     ).wait();
 
-    // giving just a bit of Dai to FRAX holder to pay for interest later
+    // giving just a bit of Dai to GUNI holder to pay for interest later
     await (await dai.transfer(GUNI_HOLDER, parseEther('10'))).wait();
     await (
       await guni.transfer(
@@ -158,7 +126,7 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
     // deploying the payload
     await rawBRE.ethers.provider.send('evm_mine', [0]);
 
-    await rawBRE.deployments.deploy('AssetListingProposalGenericExecutor', {
+    await rawBRE.deployments.deploy('AssetListingGUni', {
       from: proposer.address,
       gasLimit: 4000000,
       gasPrice: BigNumber.from('75000000000'),
@@ -168,7 +136,7 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
 
     proposal = await gov.getProposalsCount();
 
-    await rawBRE.run('create:proposal-new-asset:gunidaiusdc');
+    await rawBRE.run('create:proposal-new-asset:guni');
 
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
@@ -183,8 +151,9 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
   });
 
   it('Should list correctly an asset: borrow off, collateral on, stable borrow off', async () => {
-
+    console.log("trying to execute proposal...")
     await (await gov.execute(proposal)).wait();
+    console.log("success!!")
     const proposalState = await gov.getProposalState(proposal);
     expect(proposalState).to.be.equal(7);
     const {
@@ -192,16 +161,16 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
       aTokenAddress,
       stableDebtTokenAddress,
       variableDebtTokenAddress,
-    } = await pool.getReserveData(TOKEN);
+    } = await pool.getReserveData(GUNI1);
     const poolData = parsePoolData(data);
     expect(poolData).to.be.eql({
-      reserveFactor: RESERVE_FACTOR,
+      reserveFactor: '1000',
       reserved: '0',
       stableRateEnabled: '0',
       borrowingEnabled: '0',
       reserveFrozen: '0',
       reserveActive: '1',
-      decimals: DECIMALS,
+      decimals: '18',
       liquidityBonus: '11500',
       LiquidityThreshold: '7000',
       LTV: '6000',
@@ -220,6 +189,7 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
+
     // GUNI deposit by guni holder
     const depositedAmount = parseEther('1').div(decimalMultiplier);
     await (
@@ -246,6 +216,6 @@ describe('Deploy G-UNI DAI/USDC assets with different params', () => {
   });
 
   it("Oracle should return a non zero G-UNI price", async () => {
-    expect(await oracle.getAssetPrice(TOKEN)).to.be.gt('0')
+    expect(await oracle.getAssetPrice(GUNI1)).to.be.gt('0')
   })
 });

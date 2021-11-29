@@ -11,14 +11,13 @@
     "test:bond": "MAINNET_FORK=true FORKING_BLOCK=12767300 hardhat test ./test/test-listing-bond.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:rai": "MAINNET_FORK=true FORKING_BLOCK=12593370 hardhat test ./test/test-listing-rai.spec.ts",
-    "test:gunidaiusdc": "MAINNET_FORK=true FORKING_BLOCK=13683497 hardhat test ./test/test-listing-gunidaiusdc.spec.ts",
+    "test:guni": "MAINNET_FORK=true FORKING_BLOCK=13690000 hardhat test ./test/test-listing-guni.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
     "propose-new-asset:bond:main": "hardhat create:proposal-new-asset:bond --network main",
     "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main",
-    "propose-new-asset:gunidaiusdc:main": "hardhat create:proposal-new-asset:gunidaiusdc --network main",
-    "propose-new-asset:guniusdcusdt:main": "hardhat create:proposal-new-asset:guniusdcusdt --network main"
+    "propose-new-asset:guni:main": "hardhat create:proposal-new-asset:guni --network main"
   },
   "keywords": [],
   "author": "dhadrien",

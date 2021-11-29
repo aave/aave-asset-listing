@@ -45,11 +45,11 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
   address constant AAVE_ORACLE = 0xA50ba011c48153De246E5192C8f9258A2ba79Ca9;
 
   // BPT V2 to list
-  address constant GUNIDAIUSDC_ORACLE = 0x7843eA2E3e60b24cc12B56C5627Adc7F9f0749D6;
-  address constant GUNIUSDCUSDT_ORACLE = 0x399e3bb2BBd49c570aa6edc6ac390E0D0aCbbD5e;
+  address constant GUniDAIUSDC_ORACLE = 0x7843eA2E3e60b24cc12B56C5627Adc7F9f0749D6;
+  address constant GUniUSDCUSDT_ORACLE = 0x399e3bb2BBd49c570aa6edc6ac390E0D0aCbbD5e;
 
-  address constant GUNIDAIUSDC = 0x50379f632ca68D36E50cfBC8F78fe16bd1499d1e;
-  address constant GUNIUSDCUSDT = 0xD2eeC91055F07fE24C9cCB25828ecfEFd4be0c41;
+  address constant GUniDAIUSDC = 0x50379f632ca68D36E50cfBC8F78fe16bd1499d1e;
+  address constant GUniUSDCUSDT = 0xD2eeC91055F07fE24C9cCB25828ecfEFd4be0c41;
 
   // Reserves configuration
   address constant ATOKEN_IMPL = 0x517AD97cD3543eE616cDb3D7765b201D6c9dFFdd;
@@ -85,13 +85,13 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
       'Aave AMM Market Variable Debt ',
       'Aave AMM Market Stable Debt '
     );
-    address[2] memory LP_TOKENS_TO_LIST_MARKET = [GUNIDAIUSDC, GUNIUSDCUSDT];
+    address[2] memory LP_TOKENS_TO_LIST_MARKET = [GUniDAIUSDC, GUniUSDCUSDT];
 
-    address[2] memory TOKENS_TO_LIST_ORACLE = [GUNIDAIUSDC, GUNIUSDCUSDT];
+    address[2] memory TOKENS_TO_LIST_ORACLE = [GUniDAIUSDC, GUniUSDCUSDT];
 
-    address[2] memory TOKEN_ORACLE_SOURCES = [GUNIDAIUSDC_ORACLE, GUNIUSDCUSDT_ORACLE];
+    address[2] memory TOKEN_ORACLE_SOURCES = [GUniDAIUSDC_ORACLE, GUniUSDCUSDT_ORACLE];
 
-    string[2] memory LP_TOKEN_NAMES = ['GUNIDAIUSDC', 'GUNIUSDCUSDT'];
+    string[2] memory LP_TOKEN_NAMES = ['GUniDAIUSDC', 'GUniUSDCUSDT'];
 
     CollateralConfig[2] memory LP_COLLATERAL_CONFIGS = [
       CollateralConfig(6000, 7000),

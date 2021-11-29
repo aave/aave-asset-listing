@@ -60,7 +60,7 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
   address constant INCENTIVES_CONTROLLER_ADDRESS = 0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5;
 
   uint256 constant LIQUIDATION_BONUS = 11500;
-  uint256 constant RESERVE_FACTOR = 1500;
+  uint256 constant RESERVE_FACTOR = 1000;
 
   struct NamingConvention {
     string aTokenSymbolPrefix;
@@ -99,7 +99,7 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
     ];
 
     IPoolConfigurator.InitReserveInput[]
-      memory batchInit = new IPoolConfigurator.InitReserveInput[](4);
+      memory batchInit = new IPoolConfigurator.InitReserveInput[](2);
 
     for (uint256 i; i < batchInit.length; i++) {
       batchInit[i] = IPoolConfigurator.InitReserveInput({

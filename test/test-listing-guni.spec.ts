@@ -21,6 +21,7 @@ import { parsePoolData } from './utils/listing';
 import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
 import { IAaveOracle } from '../types/IAaveOracle';
 import { ILendingPool } from '../types/ILendingPool';
+import { AssetListingGUni } from '../types/AssetListingGUni';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { IERC20 } from '../types/IERC20';
 
@@ -102,10 +103,10 @@ describe('Deploy G-UNI assets with different params', () => {
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
     guni = (await ethers.getContractAt('IERC20', GUNI1, guniHolder)) as IERC20;
-    oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle
+    oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle;
     decimalMultiplier = BigNumber.from('10').pow(BigNumber.from("18"));
 
-    // Give guni to whale
+    // Give aave to proposer
     await (
       await aave.transfer(
         proposer.address,
@@ -115,10 +116,13 @@ describe('Deploy G-UNI assets with different params', () => {
 
     // giving just a bit of Dai to GUNI holder to pay for interest later
     await (await dai.transfer(GUNI_HOLDER, parseEther('10'))).wait();
+    
+    // give GUNI to proposer
+    const gUniBalance = await guni.balanceOf(GUNI_HOLDER);
     await (
       await guni.transfer(
         proposer.address,
-        (await guni.balanceOf(GUNI_HOLDER)).sub((parseEther('2').div(decimalMultiplier)))
+        gUniBalance.div(BigNumber.from("5"))
       )
     ).wait();
 
@@ -138,6 +142,11 @@ describe('Deploy G-UNI assets with different params', () => {
 
     await rawBRE.run('create:proposal-new-asset:guni');
 
+    const payloadAddress = (
+      await rawBRE.deployments.get('AssetListingGUni')
+    ).address;
+    console.log(payloadAddress)
+
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
 
@@ -151,9 +160,8 @@ describe('Deploy G-UNI assets with different params', () => {
   });
 
   it('Should list correctly an asset: borrow off, collateral on, stable borrow off', async () => {
-    console.log("trying to execute proposal...")
     await (await gov.execute(proposal)).wait();
-    console.log("success!!")
+    
     const proposalState = await gov.getProposalState(proposal);
     expect(proposalState).to.be.equal(7);
     const {
@@ -177,6 +185,7 @@ describe('Deploy G-UNI assets with different params', () => {
     });
 
     // preparing for tests.
+    console.log("prepare for tests...")
     aGuni = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
     stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
     variableDebt = (await ethers.getContractAt(
@@ -188,10 +197,12 @@ describe('Deploy G-UNI assets with different params', () => {
     await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
 
     // AAVE deposit by proposer
-    await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
+    /*console.log("aave deposit by proposer")
+    await (await pool.deposit(aave.address, parseEther('10'), proposer.address, 0)).wait();*/
 
     // GUNI deposit by guni holder
-    const depositedAmount = parseEther('1').div(decimalMultiplier);
+    console.log("guni deposit by g uni holder")
+    const depositedAmount = parseEther('3');
     await (
       await pool.connect(guniHolder).deposit(guni.address, depositedAmount, GUNI_HOLDER, 0)
     ).wait();
@@ -199,6 +210,7 @@ describe('Deploy G-UNI assets with different params', () => {
     expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount.add(1));
 
     // G-UNI holder able to borrow DAI against G-UNI
+    console.log("guni holder borrows dai")
     await (
       await pool.connect(guniHolder).borrow(dai.address, parseEther('1'), 2, 0, GUNI_HOLDER)
     ).wait();

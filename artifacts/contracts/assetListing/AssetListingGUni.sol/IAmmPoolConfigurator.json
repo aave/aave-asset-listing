@@ -1,6 +1,6 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IPoolConfigurator",
+  "contractName": "IAmmPoolConfigurator",
   "sourceName": "contracts/assetListing/AssetListingGUni.sol",
   "abi": [
     {
@@ -88,7 +88,7 @@
               "type": "bytes"
             }
           ],
-          "internalType": "struct IPoolConfigurator.InitReserveInput[]",
+          "internalType": "struct IAmmPoolConfigurator.InitReserveInput[]",
           "name": "input",
           "type": "tuple[]"
         }

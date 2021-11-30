@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import {IAaveOracle} from "./interfaces/IAaveOracle.sol";
 
-interface IPoolConfigurator {
+interface IAmmPoolConfigurator {
   struct InitReserveInput {
     address aTokenImpl;
     address stableDebtTokenImpl;
@@ -44,7 +44,7 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
   address constant POOL_CONFIGURATOR = 0x23A875eDe3F1030138701683e42E9b16A7F87768;
   address constant AAVE_ORACLE = 0xA50ba011c48153De246E5192C8f9258A2ba79Ca9;
 
-  // BPT V2 to list
+  // G-UNI to list
   address constant GUniDAIUSDC_ORACLE = 0x7843eA2E3e60b24cc12B56C5627Adc7F9f0749D6;
   address constant GUniUSDCUSDT_ORACLE = 0x399e3bb2BBd49c570aa6edc6ac390E0D0aCbbD5e;
 
@@ -98,11 +98,11 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
       CollateralConfig(6000, 7000)
     ];
 
-    IPoolConfigurator.InitReserveInput[]
-      memory batchInit = new IPoolConfigurator.InitReserveInput[](2);
+    IAmmPoolConfigurator.InitReserveInput[]
+      memory batchInit = new IAmmPoolConfigurator.InitReserveInput[](2);
 
     for (uint256 i; i < batchInit.length; i++) {
-      batchInit[i] = IPoolConfigurator.InitReserveInput({
+      batchInit[i] = IAmmPoolConfigurator.InitReserveInput({
         aTokenImpl: ATOKEN_IMPL,
         stableDebtTokenImpl: STABLE_DEBT_TOKEN_IMPL,
         variableDebtTokenImpl: VARIABLE_DEBT_TOKEN_IMPL,
@@ -122,7 +122,7 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
       });
     }
 
-    // 1. Setup Balancer V2 LP tokens with their price sources at the Aave Oracle
+    // 1. Setup G-UNI LP tokens with their price sources at the Aave Oracle
     address[] memory tokensToListOracle = new address[](2);
     address[] memory tokenOracleSources = new address[](2);
     for (uint256 o; o < TOKENS_TO_LIST_ORACLE.length; o++) {
@@ -131,18 +131,18 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
     }
     IAaveOracle(AAVE_ORACLE).setAssetSources(tokensToListOracle, tokenOracleSources);
 
-    // 2. Batch init reserve Balancer V2 LP tokens
-    IPoolConfigurator(POOL_CONFIGURATOR).batchInitReserve(batchInit);
+    // 2. Batch init reserve G-UNI LP tokens
+    IAmmPoolConfigurator(POOL_CONFIGURATOR).batchInitReserve(batchInit);
 
-    // 3. Set reserve collateral configuration and reserve factor for each Balancer V2 LP token
+    // 3. Set reserve collateral configuration and reserve factor for each G-UNI LP token
     for (uint256 y; y < batchInit.length; y++) {
-      IPoolConfigurator(POOL_CONFIGURATOR).configureReserveAsCollateral(
+      IAmmPoolConfigurator(POOL_CONFIGURATOR).configureReserveAsCollateral(
         LP_TOKENS_TO_LIST_MARKET[y],
         LP_COLLATERAL_CONFIGS[y].ltv,
         LP_COLLATERAL_CONFIGS[y].liquidationThreshold,
         LIQUIDATION_BONUS
       );
-      IPoolConfigurator(POOL_CONFIGURATOR).setReserveFactor(
+      IAmmPoolConfigurator(POOL_CONFIGURATOR).setReserveFactor(
         LP_TOKENS_TO_LIST_MARKET[y],
         RESERVE_FACTOR
       );

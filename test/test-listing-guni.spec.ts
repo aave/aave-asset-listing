@@ -21,15 +21,23 @@ import { parsePoolData } from './utils/listing';
 import { IAaveGovernanceV2 } from '../types/IAaveGovernanceV2';
 import { IAaveOracle } from '../types/IAaveOracle';
 import { ILendingPool } from '../types/ILendingPool';
-import { AssetListingGUni } from '../types/AssetListingGUni';
 import { SelfdestructTransferFactory } from '../types/SelfdestructTransferFactory'
 import { IERC20 } from '../types/IERC20';
+
+config({ path: path.resolve(process.cwd(), '.guni.env') });
+
+const {
+  TOKEN0,
+  TOKEN1
+} = process.env;
+
+if (!TOKEN0 || !TOKEN1) {
+  throw new Error('You have not set correctly the .env file');
+}
 
 const AAVE_GOVERNANCE_V2 = "0xEC568fffba86c094cf06b22134B23074DFE2252c"
 const AAVE_LENDING_POOL = "0x7937D4799803FbBe595ed57278Bc4cA21f3bFfCB" //'0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9';
 const VOTING_DURATION = 19200;
-
-const GUNI1 = "0x50379f632ca68D36E50cfBC8F78fe16bd1499d1e"
 
 const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
 const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9';
@@ -55,7 +63,8 @@ describe('Deploy G-UNI assets with different params', () => {
   let pool: ILendingPool;
   let oracle: IAaveOracle;
   let aave: IERC20;
-  let guni: IERC20;
+  let guni0: IERC20;
+  let guni1: IERC20;
   let dai: IERC20;
   let aGuni: IERC20;
   let stableDebt: IERC20;
@@ -102,7 +111,8 @@ describe('Deploy G-UNI assets with different params', () => {
     // getting tokens used for tests
     aave = (await ethers.getContractAt('IERC20', AAVE_TOKEN, whale)) as IERC20;
     dai = (await ethers.getContractAt('IERC20', DAI_TOKEN, daiHolder)) as IERC20;
-    guni = (await ethers.getContractAt('IERC20', GUNI1, guniHolder)) as IERC20;
+    guni0 = (await ethers.getContractAt('IERC20', TOKEN0, guniHolder)) as IERC20;
+    guni1 = (await ethers.getContractAt('IERC20', TOKEN1, guniHolder)) as IERC20;
     oracle = (await ethers.getContractAt('IAaveOracle', AAVE_ORACLE)) as IAaveOracle;
     decimalMultiplier = BigNumber.from('10').pow(BigNumber.from("18"));
 
@@ -118,9 +128,17 @@ describe('Deploy G-UNI assets with different params', () => {
     await (await dai.transfer(GUNI_HOLDER, parseEther('10'))).wait();
     
     // give GUNI to proposer
-    const gUniBalance = await guni.balanceOf(GUNI_HOLDER);
+    let gUniBalance = await guni0.balanceOf(GUNI_HOLDER);
     await (
-      await guni.transfer(
+      await guni0.transfer(
+        proposer.address,
+        gUniBalance.div(BigNumber.from("5"))
+      )
+    ).wait();
+
+    gUniBalance = await guni1.balanceOf(GUNI_HOLDER);
+    await (
+      await guni1.transfer(
         proposer.address,
         gUniBalance.div(BigNumber.from("5"))
       )
@@ -164,14 +182,8 @@ describe('Deploy G-UNI assets with different params', () => {
     
     const proposalState = await gov.getProposalState(proposal);
     expect(proposalState).to.be.equal(7);
-    const {
-      configuration: { data },
-      aTokenAddress,
-      stableDebtTokenAddress,
-      variableDebtTokenAddress,
-    } = await pool.getReserveData(GUNI1);
-    const poolData = parsePoolData(data);
-    expect(poolData).to.be.eql({
+
+    const expectedConfig = {
       reserveFactor: '1000',
       reserved: '0',
       stableRateEnabled: '0',
@@ -182,52 +194,84 @@ describe('Deploy G-UNI assets with different params', () => {
       liquidityBonus: '11500',
       LiquidityThreshold: '7000',
       LTV: '6000',
-    });
+    };
 
-    // preparing for tests.
-    console.log("prepare for tests...")
-    aGuni = (await ethers.getContractAt('IERC20', aTokenAddress, proposer)) as IERC20;
-    stableDebt = (await ethers.getContractAt('IERC20', stableDebtTokenAddress, proposer)) as IERC20;
+    let reserveData = await pool.getReserveData(TOKEN0);
+    let poolData = parsePoolData(reserveData.configuration.data);
+    expect(poolData).to.be.eql(expectedConfig);
+
+    // preparing for tests on G-UNI DAI/USDC (guni0)
+    aGuni = (await ethers.getContractAt('IERC20', reserveData.aTokenAddress, proposer)) as IERC20;
+    stableDebt = (await ethers.getContractAt('IERC20', reserveData.stableDebtTokenAddress, proposer)) as IERC20;
     variableDebt = (await ethers.getContractAt(
       'IERC20',
-      variableDebtTokenAddress,
+      reserveData.variableDebtTokenAddress,
       proposer
     )) as IERC20;
-    await (await guni.connect(guniHolder).approve(pool.address, parseEther('200000'))).wait();
-    await (await aave.connect(proposer).approve(pool.address, parseEther('200000'))).wait();
-
-    // AAVE deposit by proposer
-    /*console.log("aave deposit by proposer")
-    await (await pool.deposit(aave.address, parseEther('10'), proposer.address, 0)).wait();*/
+    await (await guni0.connect(guniHolder).approve(pool.address, parseEther('200000'))).wait();
 
     // GUNI deposit by guni holder
-    console.log("guni deposit by g uni holder")
-    const depositedAmount = parseEther('3');
+    const depositedAmount0 = parseEther('3');
     await (
-      await pool.connect(guniHolder).deposit(guni.address, depositedAmount, GUNI_HOLDER, 0)
+      await pool.connect(guniHolder).deposit(guni0.address, depositedAmount0, GUNI_HOLDER, 0)
     ).wait();
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.gte(depositedAmount.sub(1));
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount.add(1));
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.gte(depositedAmount0.sub(1));
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount0.add(1));
 
     // G-UNI holder able to borrow DAI against G-UNI
-    console.log("guni holder borrows dai")
     await (
       await pool.connect(guniHolder).borrow(dai.address, parseEther('1'), 2, 0, GUNI_HOLDER)
     ).wait();
 
-    // proposer NOT able to borrow G-UNI
-    const borrowAmount = parseEther('10').div(decimalMultiplier);
+    reserveData = await pool.getReserveData(TOKEN1);
+    poolData = parsePoolData(reserveData.configuration.data);
+    expect(poolData).to.be.eql(expectedConfig);
+
+    // preparing for tests on G-UNI DAI/USDC
+    aGuni = (await ethers.getContractAt('IERC20', reserveData.aTokenAddress, proposer)) as IERC20;
+    stableDebt = (await ethers.getContractAt('IERC20', reserveData.stableDebtTokenAddress, proposer)) as IERC20;
+    variableDebt = (await ethers.getContractAt(
+      'IERC20',
+      reserveData.variableDebtTokenAddress,
+      proposer
+    )) as IERC20;
+    await (await guni1.connect(guniHolder).approve(pool.address, parseEther('200000'))).wait();
+
+    // GUNI deposit by guni holder
+    const depositedAmount1 = parseEther('.0000009');
+    await (
+      await pool.connect(guniHolder).deposit(guni1.address, depositedAmount1, GUNI_HOLDER, 0)
+    ).wait();
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.gte(depositedAmount1.sub(1));
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount1.add(1));
+
+    // G-UNI holder able to borrow DAI against G-UNI
+    await (
+      await pool.connect(guniHolder).borrow(dai.address, parseEther('1'), 2, 0, GUNI_HOLDER)
+    ).wait();
+
+    // G-UNI holder NOT able to borrow G-UNI
+    const borrowAmount0 = parseEther('0.1')
     await expect(
-      pool.connect(proposer).borrow(guni.address, borrowAmount, 2, 0, proposer.address)
-    ).to.be.reverted;
+      pool.connect(guniHolder).borrow(guni0.address, borrowAmount0, 2, 0, GUNI_HOLDER)
+    ).to.be.revertedWith("7");
 
     await expect(
-      pool.borrow(guni.address, borrowAmount, 1, 0, proposer.address)
-    ).to.be.reverted;
-    increaseTime(40000);
+      pool.borrow(guni0.address, borrowAmount0, 1, 0, GUNI_HOLDER)
+    ).to.be.revertedWith("7");
+
+    const borrowAmount1 = parseEther('0.0000001')
+    await expect(
+      pool.connect(proposer).borrow(guni1.address, borrowAmount1, 2, 0, GUNI_HOLDER)
+    ).to.be.revertedWith("7");
+
+    await expect(
+      pool.borrow(guni1.address, borrowAmount1, 1, 0, GUNI_HOLDER)
+    ).to.be.revertedWith("7");
   });
 
-  it("Oracle should return a non zero G-UNI price", async () => {
-    expect(await oracle.getAssetPrice(GUNI1)).to.be.gt('0')
+  it("Oracles should return a non zero G-UNI price", async () => {
+    expect(await oracle.getAssetPrice(TOKEN0)).to.be.gt('0');
+    expect(await oracle.getAssetPrice(TOKEN1)).to.be.gt('0');
   })
 });

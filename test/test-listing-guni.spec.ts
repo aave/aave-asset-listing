@@ -254,20 +254,20 @@ describe('Deploy G-UNI assets with different params', () => {
     const borrowAmount0 = parseEther('0.1')
     await expect(
       pool.connect(guniHolder).borrow(guni0.address, borrowAmount0, 2, 0, GUNI_HOLDER)
-    ).to.be.revertedWith("7");
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
 
     await expect(
       pool.borrow(guni0.address, borrowAmount0, 1, 0, GUNI_HOLDER)
-    ).to.be.revertedWith("7");
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
 
     const borrowAmount1 = parseEther('0.0000001')
     await expect(
       pool.connect(proposer).borrow(guni1.address, borrowAmount1, 2, 0, GUNI_HOLDER)
-    ).to.be.revertedWith("7");
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
 
     await expect(
       pool.borrow(guni1.address, borrowAmount1, 1, 0, GUNI_HOLDER)
-    ).to.be.revertedWith("7");
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
   });
 
   it("Oracles should return a non zero G-UNI price", async () => {

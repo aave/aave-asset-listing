@@ -36,7 +36,7 @@ if (!TOKEN0 || !TOKEN1) {
 }
 
 const AAVE_GOVERNANCE_V2 = "0xEC568fffba86c094cf06b22134B23074DFE2252c"
-const AAVE_LENDING_POOL = "0x7937D4799803FbBe595ed57278Bc4cA21f3bFfCB" //'0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9';
+const AAVE_LENDING_POOL = "0x7937D4799803FbBe595ed57278Bc4cA21f3bFfCB"
 const VOTING_DURATION = 19200;
 
 const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
@@ -67,8 +67,6 @@ describe('Deploy G-UNI assets with different params', () => {
   let guni1: IERC20;
   let dai: IERC20;
   let aGuni: IERC20;
-  let stableDebt: IERC20;
-  let variableDebt: IERC20;
   let proposal: BigNumber;
   let snapshotId: string;
   let decimalMultiplier: BigNumber;
@@ -202,12 +200,6 @@ describe('Deploy G-UNI assets with different params', () => {
 
     // preparing for tests on G-UNI DAI/USDC (guni0)
     aGuni = (await ethers.getContractAt('IERC20', reserveData.aTokenAddress, proposer)) as IERC20;
-    stableDebt = (await ethers.getContractAt('IERC20', reserveData.stableDebtTokenAddress, proposer)) as IERC20;
-    variableDebt = (await ethers.getContractAt(
-      'IERC20',
-      reserveData.variableDebtTokenAddress,
-      proposer
-    )) as IERC20;
     await (await guni0.connect(guniHolder).approve(pool.address, parseEther('200000'))).wait();
 
     // GUNI deposit by guni holder
@@ -215,8 +207,7 @@ describe('Deploy G-UNI assets with different params', () => {
     await (
       await pool.connect(guniHolder).deposit(guni0.address, depositedAmount0, GUNI_HOLDER, 0)
     ).wait();
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.gte(depositedAmount0.sub(1));
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount0.add(1));
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.eq(depositedAmount0);
 
     // G-UNI holder able to borrow DAI against G-UNI
     await (
@@ -229,12 +220,6 @@ describe('Deploy G-UNI assets with different params', () => {
 
     // preparing for tests on G-UNI DAI/USDC
     aGuni = (await ethers.getContractAt('IERC20', reserveData.aTokenAddress, proposer)) as IERC20;
-    stableDebt = (await ethers.getContractAt('IERC20', reserveData.stableDebtTokenAddress, proposer)) as IERC20;
-    variableDebt = (await ethers.getContractAt(
-      'IERC20',
-      reserveData.variableDebtTokenAddress,
-      proposer
-    )) as IERC20;
     await (await guni1.connect(guniHolder).approve(pool.address, parseEther('200000'))).wait();
 
     // GUNI deposit by guni holder
@@ -242,8 +227,7 @@ describe('Deploy G-UNI assets with different params', () => {
     await (
       await pool.connect(guniHolder).deposit(guni1.address, depositedAmount1, GUNI_HOLDER, 0)
     ).wait();
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.gte(depositedAmount1.sub(1));
-    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.lte(depositedAmount1.add(1));
+    expect(await aGuni.balanceOf(GUNI_HOLDER)).to.eq(depositedAmount1);
 
     // G-UNI holder able to borrow DAI against G-UNI
     await (

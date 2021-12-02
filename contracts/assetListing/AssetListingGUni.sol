@@ -2,7 +2,9 @@
 pragma solidity 0.7.5;
 pragma abicoder v2;
 
-import {IAaveOracle} from "./interfaces/IAaveOracle.sol";
+interface IOracle {
+  function setAssetSources(address[] calldata assets, address[] calldata sources) external;
+}
 
 interface IAmmPoolConfigurator {
   struct InitReserveInput {
@@ -129,7 +131,7 @@ contract AssetListingGUni is IProposalIncentivesExecutor {
       tokensToListOracle[o] = TOKENS_TO_LIST_ORACLE[o];
       tokenOracleSources[o] = TOKEN_ORACLE_SOURCES[o];
     }
-    IAaveOracle(AAVE_ORACLE).setAssetSources(tokensToListOracle, tokenOracleSources);
+    IOracle(AAVE_ORACLE).setAssetSources(tokensToListOracle, tokenOracleSources);
 
     // 2. Batch init reserve G-UNI LP tokens
     IAmmPoolConfigurator(POOL_CONFIGURATOR).batchInitReserve(batchInit);

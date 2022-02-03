@@ -13,6 +13,7 @@ if (process.env.SKIP_LOAD !== 'true') {
   require('./tasks/list-new-asset.ts');
   require('./tasks/list-rai.ts');
   require('./tasks/list-bond.ts');
+  require('./tasks/list-steth.ts');
 }
 
 export const BUIDLEREVM_CHAIN_ID = 31337;

@@ -1,3 +1,4 @@
+import readline from 'readline';
 import { getContractAt } from '@nomiclabs/hardhat-ethers/dist/src/helpers';
 import { config } from 'dotenv';
 import { task } from 'hardhat/config';
@@ -115,15 +116,38 @@ task('create:proposal-new-asset:steth', 'Creates a proposal to list stETH')
     // that it will pass in the "battle" run
     if (args['dryrun']) {
       try {
+        console.log('Running transaction locally...');
         await proposer.call(tx);
+        console.log('Transaction passed!');
       } catch (error) {
         console.error('Transaction seems to be failed!');
         if (error instanceof Error) {
-          console.error('Next error oquired on transaction call: ', error.message);
+          console.error('Next error occurred on transaction call: ', error.message);
         }
       }
-    } else {
-      const receipt = await proposer.sendTransaction(tx).then((tx) => tx.wait());
-      console.log('Proposal submitted in:', receipt.transactionHash);
+      return;
     }
+
+    if (process.env.PROMPT === 'true') {
+      await promptToProceed();
+    }
+
+    console.log('Sending transaction...');
+    const receipt = await proposer.sendTransaction(tx).then((tx) => tx.wait());
+    console.log('Proposal submitted in:', receipt.transactionHash);
   });
+
+const promptToProceed = () => {
+  const rdl = readline.createInterface(process.stdin, process.stdout);
+  return new Promise<void>((resolve) => {
+    rdl.question('Proceed? y/n:\n', (answer) => {
+      rdl.close();
+      if (['y', 'yes'].includes(answer)) {
+        return resolve();
+      } else if (!['n', 'no'].includes(answer)) {
+        console.log("Please respond with 'yes' or 'no'");
+      }
+      process.exit();
+    });
+  });
+};

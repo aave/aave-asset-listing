@@ -17,8 +17,8 @@
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
     "propose-new-asset:bond:main": "hardhat create:proposal-new-asset:bond --network main",
     "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main",
-    "propose-new-asset:steth:main": "hardhat create:proposal-new-asset:steth --network main",
-    "propose-new-asset:steth:fork": "MAINNET_FORK=true FORKING_BLOCK=14126327 hardhat create:proposal-new-asset:steth --network hardhat"
+    "propose-new-asset:steth:main": "PROMPT=true hardhat create:proposal-new-asset:steth --network main",
+    "propose-new-asset:steth:fork": "PROMPT=true MAINNET_FORK=true FORKING_BLOCK=14126327 hardhat create:proposal-new-asset:steth --network hardhat"
   },
   "keywords": [],
   "author": "dhadrien",

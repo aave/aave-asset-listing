@@ -231,7 +231,7 @@ describe('Test STETH asset listing with different params', () => {
 
     // validate that amount of minted astETH tokens is equal to or 1 WEI less than the amount
     // of deposit. The difference in 1 WEI might happen due to the stETH shares mechanic
-    assertLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
+    assertOneWeiLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
 
     // validate that the transferred amount of stETH tokens is equal to the amount of minted
     // astETH and all minted tokens belong to STETH_HOLDER
@@ -289,7 +289,7 @@ describe('Test STETH asset listing with different params', () => {
 
     // validate that amount of minted astETH tokens is equal to or 1 WEI less than the amount
     // of deposit. The difference in 1 WEI might happen due to the stETH shares mechanic
-    assertLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
+    assertOneWeiLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
 
     // validate that the transferred amount of stETH tokens is equal to the amount of minted
     // astETH and all minted tokens belong to STETH_HOLDER
@@ -351,7 +351,7 @@ describe('Test STETH asset listing with different params', () => {
 
     // validate that amount of minted astETH tokens is equal to or 1 WEI less than the amount
     // of deposit. The difference in 1 WEI might happen due to the stETH shares mechanic
-    assertLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('0.5'));
+    assertOneWeiLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('0.5'));
 
     // validate that the transferred amount of stETH tokens is equal to the amount of minted
     // astETH and all minted tokens belong to STETH_HOLDER
@@ -388,7 +388,7 @@ describe('Test STETH asset listing with different params', () => {
     // validate that amount of withdrawn stETH tokens are equal or 1 WEI less than the
     // astETH balance of the STETH_HOLDER before withdrawing. The difference in 1 WEI
     // might happen due to the stETH shares mechanic
-    assertLessOrEqual(
+    assertOneWeiLessOrEqual(
       await stEth.balanceOf(STETH_HOLDER),
       stEthHolderStEthBalanceBeforeWithdraw.add(stEthHolderAstEthBalanceBeforeWithdraw)
     );
@@ -438,7 +438,7 @@ describe('Test STETH asset listing with different params', () => {
 
     // validate that amount of minted astETH tokens is equal to or 1 WEI less than the amount
     // of deposit. The difference in 1 WEI might happen due to the stETH shares mechanic
-    assertLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
+    assertOneWeiLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
 
     // validate that the transferred amount of stETH tokens is equal to the amount of minted
     // astETH and all minted tokens belong to STETH_HOLDER
@@ -475,7 +475,7 @@ describe('Test STETH asset listing with different params', () => {
     // validate that amount of withdrawn stETH tokens are equal or 1 WEI less than the
     // astETH balance of the STETH_HOLDER before withdrawing. The difference in 1 WEI
     // might happen due to the stETH shares mechanic
-    assertLessOrEqual(
+    assertOneWeiLessOrEqual(
       await stEth.balanceOf(STETH_HOLDER),
       stEthHolderStEthBalanceBeforeWithdraw.add(stEthHolderAstEthBalanceBeforeWithdraw)
     );
@@ -504,7 +504,7 @@ const waitForTx = async (txPromise: Promise<ContractTransaction>) => {
   return tx.wait();
 };
 
-const assertLessOrEqual = (actual: BigNumber, expected: BigNumber, epsilon = '1') => {
-  const lowerBound = expected.sub(epsilon);
+const assertOneWeiLessOrEqual = (actual: BigNumber, expected: BigNumber) => {
+  const lowerBound = expected.sub(1);
   expect(actual).to.be.lte(expected).and.to.be.gte(lowerBound);
 };

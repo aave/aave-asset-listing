@@ -88,6 +88,7 @@ describe('Test STETH asset listing with different params', () => {
   let stEth: IERC20;
   let dai: IERC20;
   let proposalOffOffOff: BigNumber;
+  let proposalOffOnOff: BigNumber;
   let proposalOnOffOff: BigNumber;
   let proposalOnOnOff: BigNumber;
   let proposalOnOnOn: BigNumber;
@@ -155,8 +156,13 @@ describe('Test STETH asset listing with different params', () => {
     proposalOffOffOff = await gov.getProposalsCount();
     await rawBRE.run('create:proposal-new-asset:steth');
 
+    // borrow off, collateral on, stable borrow off (actual stETH listing params)
+    process.env = { ...process.env, ENABLE_AS_COLLATERAL: 'true' };
+    proposalOffOnOff = await gov.getProposalsCount();
+    await rawBRE.run('create:proposal-new-asset:steth');
+
     // borrow on, collateral off stable borrow off
-    process.env = { ...process.env, ENABLE_BORROW: 'true' };
+    process.env = { ...process.env, ENABLE_BORROW: 'true', ENABLE_AS_COLLATERAL: 'false' };
     proposalOnOffOff = await gov.getProposalsCount();
     await rawBRE.run('create:proposal-new-asset:steth');
 
@@ -173,6 +179,7 @@ describe('Test STETH asset listing with different params', () => {
     // voting, queuing proposals
     await rawBRE.ethers.provider.send('evm_mine', [0]);
     await waitForTx(gov.submitVote(proposalOffOffOff, true));
+    await waitForTx(gov.submitVote(proposalOffOnOff, true));
     await waitForTx(gov.submitVote(proposalOnOffOff, true));
     await waitForTx(gov.submitVote(proposalOnOnOff, true));
     await waitForTx(gov.submitVote(proposalOnOnOn, true));
@@ -180,10 +187,12 @@ describe('Test STETH asset listing with different params', () => {
       await latestBlock().then((blockNumber) => blockNumber + VOTING_DURATION + 1)
     );
     await waitForTx(gov.queue(proposalOffOffOff));
+    await waitForTx(gov.queue(proposalOffOnOff));
     await waitForTx(gov.queue(proposalOnOffOff));
     await waitForTx(gov.queue(proposalOnOnOff));
     await waitForTx(gov.queue(proposalOnOnOn));
     expect(await gov.getProposalState(proposalOffOffOff)).to.be.equal(5);
+    expect(await gov.getProposalState(proposalOffOnOff)).to.be.equal(5);
     expect(await gov.getProposalState(proposalOnOffOff)).to.be.equal(5);
     expect(await gov.getProposalState(proposalOnOnOff)).to.be.equal(5);
     expect(await gov.getProposalState(proposalOnOnOn)).to.be.equal(5);
@@ -253,6 +262,96 @@ describe('Test STETH asset listing with different params', () => {
     await expect(
       pool.borrow(stEth.address, parseEther('2'), 1, 0, proposer.address)
     ).to.be.revertedWith(ERRORS.NO_BORROW);
+  });
+
+  it('Should list correctly an asset: borrow off, collateral on, stable borrow off', async () => {
+    await waitForTx(gov.execute(proposalOffOnOff));
+    const proposalState = await gov.getProposalState(proposalOffOnOff);
+    expect(proposalState).to.be.equal(7);
+    const { configuration, aTokenAddress } = await pool.getReserveData(TOKEN);
+    const poolData = parsePoolData(configuration.data);
+    expect(poolData).to.be.eql({
+      reserveFactor: RESERVE_FACTOR,
+      reserved: '0',
+      stableRateEnabled: '0',
+      borrowingEnabled: '0',
+      reserveFrozen: '0',
+      reserveActive: '1',
+      decimals: DECIMALS,
+      liquidityBonus: LIQUIDATION_BONUS,
+      LiquidityThreshold: LIQUIDATION_THRESHOLD,
+      LTV,
+    });
+
+    // preparing for tests
+    const astEth = await getContractAt<IERC20>('IERC20', aTokenAddress, proposer);
+    await waitForTx(stEth.connect(stEthHolder).approve(pool.address, parseEther('1000')));
+    await waitForTx(aave.connect(proposer).approve(pool.address, parseEther('100000')));
+
+    // AAVE deposit by proposer
+    await waitForTx(pool.deposit(aave.address, parseEther('100000'), proposer.address, 0));
+
+    // validate that before deposit were no minted astETH tokens
+    expect(await astEth.totalSupply()).to.be.equal('0');
+    expect(await astEth.balanceOf(STETH_HOLDER)).to.be.equal('0');
+
+    // stETH deposit by stETH holder
+    await waitForTx(
+      pool.connect(stEthHolder).deposit(stEth.address, parseEther('50'), STETH_HOLDER, 0)
+    );
+
+    // validate that amount of minted astETH tokens is equal to or 1 WEI less than the amount
+    // of deposit. The difference in 1 WEI might happen due to the stETH shares mechanic
+    assertOneWeiLessOrEqual(await astEth.balanceOf(STETH_HOLDER), parseEther('50'));
+
+    // validate that the transferred amount of stETH tokens is equal to the amount of minted
+    // astETH and all minted tokens belong to STETH_HOLDER
+    expect(await stEth.balanceOf(astEth.address))
+      .to.be.equal(await astEth.totalSupply())
+      .and.to.be.equal(await astEth.balanceOf(STETH_HOLDER));
+
+    // stETH holder able to borrow DAI against stETH
+    await waitForTx(
+      pool.connect(stEthHolder).borrow(dai.address, parseEther('1'), 2, 0, STETH_HOLDER)
+    );
+
+    // proposer not able to borrow stETH variable against AAVE
+    await expect(
+      pool.borrow(stEth.address, parseEther('5'), 2, 0, proposer.address)
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
+
+    // proposer not able to borrow stETH stable against AAVE
+    await expect(
+      pool.borrow(stEth.address, parseEther('2'), 1, 0, proposer.address)
+    ).to.be.revertedWith(ERRORS.NO_BORROW);
+
+    // stETH holder able to repay DAI with interests
+    await waitForTx(dai.connect(stEthHolder).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(pool.connect(stEthHolder).repay(dai.address, MAX_UINT_AMOUNT, 2, STETH_HOLDER));
+
+    // stETH holder able to withdraw stETH
+    const stEthHolderStEthBalanceBeforeWithdraw = await stEth.balanceOf(STETH_HOLDER);
+    const stEthHolderAstEthBalanceBeforeWithdraw = await astEth.balanceOf(STETH_HOLDER);
+    await waitForTx(
+      pool.connect(stEthHolder).withdraw(stEth.address, MAX_UINT_AMOUNT, STETH_HOLDER)
+    );
+
+    // validate that amount of withdrawn stETH tokens are equal or 1 WEI less than the
+    // astETH balance of the STETH_HOLDER before withdrawing. The difference in 1 WEI
+    // might happen due to the stETH shares mechanic
+    assertOneWeiLessOrEqual(
+      await stEth.balanceOf(STETH_HOLDER),
+      stEthHolderStEthBalanceBeforeWithdraw.add(stEthHolderAstEthBalanceBeforeWithdraw)
+    );
+
+    // validate that on the balance of astETH token stayed the same amount of stETH as astETH
+    // total supply and that all this balance belongs to STETH_HOLDER and this balance doesn't
+    // exceed 1 WEI. The 1 WEI might stay on balances after transfers due to the stETH
+    // shares mechanic
+    expect(await astEth.totalSupply())
+      .to.be.equal(await astEth.balanceOf(STETH_HOLDER))
+      .and.to.be.equal(await stEth.balanceOf(astEth.address))
+      .and.to.be.lte('1');
   });
 
   it('Should list correctly an asset: borrow on, collateral off, stable rate off', async () => {

@@ -141,15 +141,6 @@ describe('Test STETH asset listing with different params', () => {
     // giving a bit of stETH to proposer to have to deposit
     await waitForTx(stEth.transfer(proposer.address, parseEther('10')));
 
-    // deploying the payload
-    await rawBRE.ethers.provider.send('evm_mine', [0]);
-    await rawBRE.deployments.deploy('AssetListingProposalGenericExecutor', {
-      from: proposer.address,
-      gasLimit: 4000000,
-      gasPrice: BigNumber.from('75000000000'),
-      args: [],
-    });
-
     // making 4 different proposals
     // borrow off, collateral off, stable borrow off
     process.env = { ...process.env, ENABLE_AS_COLLATERAL: 'false' };

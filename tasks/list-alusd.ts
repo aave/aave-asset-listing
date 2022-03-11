@@ -8,7 +8,7 @@ const bs58 = require('bs58');
 
 config();
 
-task('create:proposal-new-asset', 'Create some proposals and votes')
+task('create:proposal-new-asset:alusd', 'Get the calldata to make a proposal to list ALUSD')
   // eslint-disable-next-line no-empty-pattern
   .setAction(async ({}, _DRE: any) => {
     const {
@@ -26,12 +26,11 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       ENABLE_AS_COLLATERAL,
       ENABLE_STABLE_BORROW,
       IPFS_HASH,
+      CHAINLINK_ORACLE_PROXY,
       AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
       AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
+      AAVE_PRICE_ORACLE_V2 = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9' // mainnet
     } = process.env;
-    if (!LTV) {
-      throw new Error("LTV not set");
-    }
     if (
       !TOKEN ||
       !ATOKEN ||
@@ -46,8 +45,10 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       (ENABLE_AS_COLLATERAL !== 'true' && ENABLE_AS_COLLATERAL !== 'false') ||
       (ENABLE_STABLE_BORROW !== 'true' && ENABLE_STABLE_BORROW !== 'false') ||
       !IPFS_HASH ||
+      !CHAINLINK_ORACLE_PROXY||
       !AAVE_GOVERNANCE_V2 ||
       !AAVE_SHORT_EXECUTOR ||
+      ! AAVE_PRICE_ORACLE_V2 ||
       !RESERVE_FACTOR
     ) {
       throw new Error('You have not set correctly the .env file, make sure to read the README.md');
@@ -56,9 +57,10 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
     const genericPayloadAddress = (
       await _DRE.deployments.get('AssetListingProposalGenericExecutor')
     ).address;
+    console.log(genericPayloadAddress)
     const executeSignature =
       'execute(address,address,address,address,address,uint256,uint256,uint256,uint256,uint8,bool,bool,bool)';
-    const callData = _DRE.ethers.utils.defaultAbiCoder.encode(
+    const executeCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
       [
         'address',
         'address',
@@ -90,25 +92,34 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
         ENABLE_AS_COLLATERAL === 'true',
       ]
     );
+
+    // Set the Chainlink oracle address 
+    const setAssetSignature = 'setAssetSources(address[],address[])';
+    const setAssetCallData = _DRE.ethers.utils.defaultAbiCoder.encode(
+      ['address[]', 'address[]'],
+      [[TOKEN], [CHAINLINK_ORACLE_PROXY]]
+    );
+
     const gov = (await getContractAt(
       _DRE,
       'IAaveGovernanceV2',
       AAVE_GOVERNANCE_V2 || ''
     )) as IAaveGovernanceV2;
     const ipfsEncoded = `0x${bs58.decode(IPFS_HASH).slice(2).toString('hex')}`;
-
-    await (
-      await gov
+      const tx = await gov
         .connect(proposer)
+        .populateTransaction
         .create(
           AAVE_SHORT_EXECUTOR,
-          [genericPayloadAddress],
-          ['0'],
-          [executeSignature],
-          [callData],
-          [true],
+          [genericPayloadAddress, AAVE_PRICE_ORACLE_V2],
+          ['0', '0'],
+          [executeSignature, setAssetSignature],
+          [executeCallData, setAssetCallData],
+          [true, false],
           ipfsEncoded
         )
-    ).wait();
-    console.log('Your Proposal has been submitted');
+
+    console.log("Your Proposal:", tx);
+
+    await (await proposer.sendTransaction(tx)).wait()
   });

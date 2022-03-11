@@ -11,6 +11,7 @@
     "test:bond": "MAINNET_FORK=true FORKING_BLOCK=12767300 hardhat test ./test/test-listing-bond.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:rai": "MAINNET_FORK=true FORKING_BLOCK=12593370 hardhat test ./test/test-listing-rai.spec.ts",
+    "test:alusd": "MAINNET_FORK=true FORKING_BLOCK=14367337 hardhat test ./test/test-listing-alusd.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",

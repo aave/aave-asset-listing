@@ -48,7 +48,7 @@ task('create:proposal-new-asset:alusd', 'Get the calldata to make a proposal to 
       !CHAINLINK_ORACLE_PROXY||
       !AAVE_GOVERNANCE_V2 ||
       !AAVE_SHORT_EXECUTOR ||
-      ! AAVE_PRICE_ORACLE_V2 ||
+      !AAVE_PRICE_ORACLE_V2 ||
       !RESERVE_FACTOR
     ) {
       throw new Error('You have not set correctly the .env file, make sure to read the README.md');

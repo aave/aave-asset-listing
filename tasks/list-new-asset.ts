@@ -29,9 +29,6 @@ task('create:proposal-new-asset', 'Create some proposals and votes')
       AAVE_GOVERNANCE_V2 = '0xEC568fffba86c094cf06b22134B23074DFE2252c', // mainnet
       AAVE_SHORT_EXECUTOR = '0xee56e2b3d491590b5b31738cc34d5232f378a8d5', // mainnet
     } = process.env;
-    if (!LTV) {
-      throw new Error("LTV not set");
-    }
     if (
       !TOKEN ||
       !ATOKEN ||

@@ -16,7 +16,8 @@
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
     "propose-new-asset:bond:main": "hardhat create:proposal-new-asset:bond --network main",
-    "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main"
+    "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main",
+    "propose-new-asset:alusd:main": "hardhat create:proposal-new-asset:alusd --network main"
   },
   "keywords": [],
   "author": "dhadrien",

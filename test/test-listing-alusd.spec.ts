@@ -67,11 +67,11 @@ const VOTING_DURATION = 19200;
 const AAVE_WHALE = '0x25f2226b597e8f9514b3f68f00f494cf4f286491';
 const AAVE_TOKEN = '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9';
 
-const ALUSD_HOLDER = '0xBC6DA0FE9aD5f3b0d58160288917AA56653660E9';
+const ALUSD_HOLDER = '0xB05136FAcE3F8c6f9e6CDb076a38Ee6D4910f6d4';
 const AAVE_ORACLE = '0xA50ba011c48153De246E5192C8f9258A2ba79Ca9';
 
 const DAI_TOKEN = '0x6b175474e89094c44da98b954eedeac495271d0f';
-const DAI_HOLDER = '0x72aabd13090af25dbb804f84de6280c697ed1150';
+const DAI_HOLDER = '0xE78388b4CE79068e89Bf8aA7f218eF6b9AB0e9d0';
 
 const ERRORS = {
   NO_BORROW: '7',
@@ -97,6 +97,7 @@ describe('Deploy ALUSD assets with different params', () => {
   let snapshotId: string;
   let decimalMultiplier: BigNumber;
   before(async () => {
+    console.log("before everything");
     [proposer] = await rawBRE.ethers.getSigners();
     // send ether to the AAVE_WHALE, which is a non payable contract. Via selfdestruct
     await rawBRE.deployments.deploy('SelfdestructTransfer', { from: proposer.address });
@@ -139,6 +140,7 @@ describe('Deploy ALUSD assets with different params', () => {
     decimalMultiplier = BigNumber.from('10').pow(await alusd.decimals());
     
     // Give alusd to whale
+    console.log("give alusd to whale");
     await (
       await aave.transfer(
         proposer.address,
@@ -147,7 +149,12 @@ describe('Deploy ALUSD assets with different params', () => {
     ).wait();
 
     // giving just a bit of Dai to ALUSD holder to pay for interest later
+    console.log("give dai to alusd holder to pay for interest");
     await (await dai.transfer(ALUSD_HOLDER, parseEther('10'))).wait();
+    console.log("transfer alusd to proposer");
+    let alusdHolderBalance = await alusd.balanceOf(ALUSD_HOLDER);
+    let amount = (await alusd.balanceOf(ALUSD_HOLDER)).sub((parseEther('1000').div(decimalMultiplier)));
+    console.log(`alusd amount: ${amount}, holder: ${alusdHolderBalance}`);
     await (
       await alusd.transfer(
         proposer.address,
@@ -157,6 +164,7 @@ describe('Deploy ALUSD assets with different params', () => {
 
 
     // deploying the payload
+    console.log("deploy payload");
     await rawBRE.ethers.provider.send('evm_mine', [0]);
     
     await rawBRE.deployments.deploy('AssetListingProposalGenericExecutor', {
@@ -198,7 +206,7 @@ describe('Deploy ALUSD assets with different params', () => {
     expect(poolData).to.be.eql({
       reserveFactor: RESERVE_FACTOR,
       reserved: '0',
-      stableRateEnabled: '0',
+      stableRateEnabled: '1',
       borrowingEnabled: '1',
       reserveFrozen: '0',
       reserveActive: '1',
@@ -241,16 +249,17 @@ describe('Deploy ALUSD assets with different params', () => {
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
 
-    // proposer not able to borrow ALUSD stable against AAVE
-    await expect(
-      pool.borrow(alusd.address, borrowAmount, 1, 0, proposer.address)
-    ).to.be.revertedWith(ERRORS.NO_STABLE_BORROW);
+    // proposer able to borrow ALUSD stable against AAVE
+    await (
+      await pool.borrow(alusd.address, borrowAmount, 1, 0, proposer.address)
+    ).wait();
     increaseTime(40000);
 
     // proposer able to repay ALUSD variable
     await (await alusd.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
     await (await pool.repay(alusd.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
+  
   });
 
   it("Oracle should return a non zero ALUSD price", async () => {

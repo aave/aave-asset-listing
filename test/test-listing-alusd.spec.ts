@@ -191,7 +191,7 @@ describe('Deploy ALUSD assets with different params', () => {
     snapshotId = await evmSnapshot();
   });
   
-  it('Should list correctly an asset: borrow on, collateral off, stable borrow off', async () => {
+  it('Should list correctly an asset: borrow on, collateral off, stable borrow on', async () => {
 
     await (await gov.execute(proposal)).wait();
     const proposalState = await gov.getProposalState(proposal);
@@ -229,7 +229,7 @@ describe('Deploy ALUSD assets with different params', () => {
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-    // ALUSD deposit by ampl holder
+    // ALUSD deposit by alUSD holder
     const depositedAmount = parseEther('100').div(decimalMultiplier);
     await (
       await pool.connect(alusdHolder).deposit(alusd.address, depositedAmount, ALUSD_HOLDER, 0)
@@ -248,6 +248,12 @@ describe('Deploy ALUSD assets with different params', () => {
       await pool.connect(proposer).borrow(alusd.address, borrowAmount, 2, 0, proposer.address)
     ).wait();
     expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(borrowAmount);
+    increaseTime(40000);
+
+    // proposer able to repay ALUSD variable
+    await (await alusd.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
+    await (await pool.repay(alusd.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
+    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
 
     // proposer able to borrow ALUSD stable against AAVE
     await (
@@ -255,11 +261,9 @@ describe('Deploy ALUSD assets with different params', () => {
     ).wait();
     increaseTime(40000);
 
-    // proposer able to repay ALUSD variable
-    await (await alusd.connect(proposer).approve(pool.address, parseEther('100000'))).wait();
-    await (await pool.repay(alusd.address, MAX_UINT_AMOUNT, 2, proposer.address)).wait();
-    expect(await variableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));
-  
+    // propoer able to repay ALUSD stable
+    await (await pool.repay(alusd.address, MAX_UINT_AMOUNT, 1, proposer.address)).wait();
+    expect(await stableDebt.balanceOf(proposer.address)).to.be.equal(parseEther('0'));  
   });
 
   it("Oracle should return a non zero ALUSD price", async () => {

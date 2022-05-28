@@ -180,7 +180,7 @@ describe('Deploy CVX assets with different params', () => {
     snapshotId = await evmSnapshot();
   });
 
-  it('Should list correctly an asset: borrow on, collateral off, stable borrow off', async () => {
+  it('Should list correctly an asset: borrow on, collateral on, stable borrow off', async () => {
     await (await gov.execute(proposal)).wait();
     const proposalState = await gov.getProposalState(proposal);
     expect(proposalState).to.be.equal(7);
@@ -199,9 +199,9 @@ describe('Deploy CVX assets with different params', () => {
       reserveFrozen: '0',
       reserveActive: '1',
       decimals: DECIMALS,
-      liquidityBonus: '10850',
-      LiquidityThreshold: '6000',
-      LTV: '4500',
+      liquidityBonus: LIQUIDATION_BONUS,
+      LiquidityThreshold: LIQUIDATION_THRESHOLD,
+      LTV,
     });
 
     // preparing for tests.
@@ -225,7 +225,7 @@ describe('Deploy CVX assets with different params', () => {
     expect(await aCvx.balanceOf(CVX_HOLDER)).to.gte(depositedAmount.sub(1));
     expect(await aCvx.balanceOf(CVX_HOLDER)).to.lte(depositedAmount.add(1));
 
-    // CVX holder not able to borrow DAI against CVX
+    // CVX holder able to borrow DAI against CVX
     await expect(
       pool.connect(cvxHolder).borrow(dai.address, parseEther('1'), 2, 0, CVX_HOLDER)
     ).to.be.revertedWith(ERRORS.NO_COLLATERAL_BALANCE);

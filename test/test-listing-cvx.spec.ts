@@ -217,7 +217,7 @@ describe('Deploy CVX assets with different params', () => {
 
     // AAVE deposit by proposer
     await (await pool.deposit(aave.address, parseEther('100'), proposer.address, 0)).wait();
-    // CVX deposit by ampl holder
+    // CVX deposit
     const depositedAmount = parseEther('100').div(decimalMultiplier);
     await (
       await pool.connect(cvxHolder).deposit(cvx.address, depositedAmount, CVX_HOLDER, 0)

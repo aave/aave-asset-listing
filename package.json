@@ -11,11 +11,14 @@
     "test:bond": "MAINNET_FORK=true FORKING_BLOCK=12767300 hardhat test ./test/test-listing-bond.spec.ts",
     "test:xsushi": "MAINNET_FORK=true FORKING_BLOCK=11829845 hardhat test ./test/test-listing-xsushi.spec.ts",
     "test:rai": "MAINNET_FORK=true FORKING_BLOCK=12593370 hardhat test ./test/test-listing-rai.spec.ts",
+    "test:cvx": "MAINNET_FORK=true FORKING_BLOCK=14891653 hardhat test ./test/test-listing-cvx.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "propose-new-asset:kovan": "hardhat create:proposal-new-asset --network kovan",
     "propose-new-asset:main": "hardhat create:proposal-new-asset --network main",
     "propose-new-asset:bond:main": "hardhat create:proposal-new-asset:bond --network main",
-    "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main"
+    "propose-new-asset:rai:main": "hardhat create:proposal-new-asset:rai --network main",
+    "propose-new-asset:cvx:main": "PROMPT=true hardhat create:proposal-new-asset:cvx --network main",
+    "propose-new-asset:cvx:fork": "PROMPT=true MAINNET_FORK=true FORKING_BLOCK=14891653 hardhat create:proposal-new-asset:cvx --network hardhat"
   },
   "keywords": [],
   "author": "dhadrien",

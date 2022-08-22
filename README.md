@@ -47,6 +47,10 @@ FORKING_BLOCK=11538355
 
 `$ npm i`
 
+## Build
+
+`$ npm run compile`
+
 ## Run the test
 
 `$ npm run test`

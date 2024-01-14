@@ -13,6 +13,7 @@ if (process.env.SKIP_LOAD !== 'true') {
   require('./tasks/list-new-asset.ts');
   require('./tasks/list-rai.ts');
   require('./tasks/list-bond.ts');
+  require('./tasks/list-ust.ts');
 }
 
 export const BUIDLEREVM_CHAIN_ID = 31337;
@@ -70,7 +71,7 @@ const mainnetFork =
         blockNumber: parseInt(process.env.FORKING_BLOCK),
         url: ALCHEMY_KEY
           ? `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_KEY}`
-          : `https://main.infura.io/v3/${INFURA_KEY}`,
+          : `https://mainnet.infura.io/v3/${INFURA_KEY}`,
       }
     : undefined;
 
